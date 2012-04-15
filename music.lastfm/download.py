@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Downloads all your track history from last.fm and exports it into
+a sqlite3 database file.
+"""
 USER = "rami95"
 FILE = "%s.lastfm.sqlite.db" % USER
 APIK = "b8258575158335e66482df0777e5b331"
