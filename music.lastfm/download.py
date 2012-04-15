@@ -35,18 +35,15 @@ if total > 0:
 		tree = xml.etree.ElementTree.fromstring(f.read())
 		rt = tree.find("recenttracks")
 		for track in rt.iter("track"):
-			try:
-				artist = track.find("artist").text
-				name = track.find("name").text
-				album = track.find("album").text
-				if track.attrib["nowplaying"] == "true":
-					continue # We get to that later.
-				else:
-					timestamp = int(track.find("date").attrib['uts'])
+			artist = track.find("artist").text
+			name = track.find("name").text
+			album = track.find("album").text
+			if "nowplaying" in track.attrib and track.attrib["nowplaying"] == "true":
+				continue # We get to that later.
+			else:
+				timestamp = int(track.find("date").attrib['uts'])
 				c.execute("INSERT INTO tracks (artist, name, album, timestamp) VALUES (?,?,?,?)",
 					(artist, name, album, timestamp))
-			except Exception as e:
-				continue
 		conn.commit()
 		print("%d%% downloaded" % int((page/totalPages)*100))
 			
