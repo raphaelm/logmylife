@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Downloads all your track history from last.fm and exports it into
 a sqlite3 database file.
@@ -10,7 +9,7 @@ APIK = "b8258575158335e66482df0777e5b331"
 
 import os
 import sqlite3
-import urllib.request
+import urllib
 import xml.etree.ElementTree
 
 if os.path.exists(FILE):
@@ -27,7 +26,7 @@ else:
 	last = 0
 
 # Check number of Pages
-f = urllib.request.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=0&from=%d" % (USER, APIK, last))
+f = urllib.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=0&from=%d" % (USER, APIK, last))
 tree = xml.etree.ElementTree.fromstring(f.read())
 rt = tree.find("recenttracks")
 total = int(rt.attrib['total'])
@@ -35,7 +34,7 @@ totalPages = int(rt.attrib['totalPages'])
 
 if total > 0:
 	for page in range(1,totalPages+1):
-		f = urllib.request.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=%d&from=%d" % (USER, APIK, page, last))
+		f = urllib.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=%d&from=%d" % (USER, APIK, page, last))
 		tree = xml.etree.ElementTree.fromstring(f.read())
 		rt = tree.find("recenttracks")
 		for track in rt.iter("track"):
