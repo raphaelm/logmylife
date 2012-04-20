@@ -4,3 +4,25 @@ Remember Stephen Wolfram?[1]
 These are the tools I use to log. :-)
 
 [1] http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life/
+
+
+Schema:
+
+	type.software/action
+
+	types:
+		* email
+			supported software:
+				* maildir[1]
+		* music
+			supported software
+				* last.fm
+
+	actions (in order of workflow):
+		* download - Collecting data from the internet
+		* scan - Collecting data from the local hard drive
+		* charts - Create awesome graphs and tables
+
+Basic storage format: SQLite3
+
+[1] GMail, downloaded with getmail
