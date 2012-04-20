@@ -3,29 +3,30 @@ Remember Stephen Wolfram?[1]
 
 These are the tools I use to log. :-)
 
-[1] http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life/
-
 
 Schema:
 
-	type.software/action
+    type.software/action
 
-	types:
-		* email
-			supported software:
-				* maildir[1]
-		* music
-			supported software
-				* last.fm
-		* microblog
-			supported software
-				* twitter (only the last 3200 tweets can be downloaded)
+    types:
+        * email
+            supported software:
+                * maildir[2]
+        * music
+            supported software
+                * last.fm
+        * microblog
+            supported software
+                * twitter (only the last 3200 tweets can be downloaded)
 
-	actions (in order of workflow):
-		* download - Collecting data from the internet
-		* scan - Collecting data from the local hard drive
-		* charts - Create awesome graphs and tables
+    actions (in order of workflow):
+        * download - Collecting data from the internet
+        * scan - Collecting data from the local hard drive
+        * charts - Create awesome graphs and tables
 
 Basic storage format: SQLite3
 
-[1] GMail, downloaded with getmail
+
+[1] http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life/
+[2] It's actually my GMail account which downloaded with getmail anyway
+for my weekly backups.

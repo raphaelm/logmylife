@@ -1,0 +1,4 @@
+*.tmp
+*~
+*.sqlite.db
+*.sqlite.db-journal
