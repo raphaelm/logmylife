@@ -17,6 +17,9 @@ Schema:
 		* music
 			supported software
 				* last.fm
+		* microblog
+			supported software
+				* twitter (only the last 3200 tweets can be downloaded)
 
 	actions (in order of workflow):
 		* download - Collecting data from the internet

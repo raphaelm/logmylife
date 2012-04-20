@@ -1,0 +1,18 @@
+#!/bin/sh
+cd email.maildir
+
+echo email data
+./scan
+cd ..
+
+echo Last.fm data
+cd music.lastfm
+./download
+cd ..
+
+echo Twitter data
+cd microblog.twitter
+./download
+cd ..
+
+echo All done!
