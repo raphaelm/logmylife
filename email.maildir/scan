@@ -22,14 +22,15 @@ class ScanMailDir:
 		d = email.utils.parsedate(r.get("Date"))
 		msgid = r.get("Message-ID")
 		if d is not None and r.get("X-Autoreply") != "yes":
-			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto) VALUES (?,?,?,?,?,?)",
+			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto, filesize) VALUES (?,?,?,?,?,?,?)",
 				(
 					msgid,
 					email.utils.parseaddr(r.get("To"))[1],
 					email.utils.parseaddr(r.get("From"))[1],
 					r.get("Content-Type", ""),
 					time.mktime(d),
-					r.get("In-Reply-To", "")
+					r.get("In-Reply-To", ""),
+					os.path.getsize(f)
 				))
 			if self.i % 10 == 0:
 				sys.stdout.write("\r%05d mails scanned" % self.i)
@@ -59,7 +60,7 @@ class ScanMailDir:
 		else:
 			self.conn = sqlite3.connect(FILE)
 			self.c = self.conn.cursor()
-			self.c.execute('''CREATE TABLE mails (msgid text unique on conflict ignore, msg_to text, msg_from text, contenttype text, msg_time real, replyto text)''')
+			self.c.execute('''CREATE TABLE mails (msgid text unique on conflict ignore, msg_to text, msg_from text, contenttype text, msg_time real, replyto text, filesize real)''')
 		self.conn.text_factory = str
 s = ScanMailDir(MDIR, FILE)
 s.scan()

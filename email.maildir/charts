@@ -11,12 +11,22 @@ ME = "(raphaelmichel95@(googlemail|gmail).com|.+@raphaelmichel.de|michel@schluse
 import sqlite3
 import os
 import re
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 	
+	
+"""
+Ideas:
+	* Time until first response (me and others) (histogram)
+"""
+
+def daterange(start_date, end_date):
+	for n in range((end_date - start_date).days):
+		yield start_date + timedelta(n)
+
 class MailDirCharts:
 		
 	def chart_date_time(self):
@@ -68,8 +78,9 @@ class MailDirCharts:
 		# Total Histogram
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
-		plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
+		#plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
+		#plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
+		plt.hist([y_out, y_in], bins=range(0,25), color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked')
 		plt.xlim(0,24)
 		plt.legend(loc=0)
 		plt.title("Mail distribution (total)")
@@ -127,9 +138,88 @@ class MailDirCharts:
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_out.hist.png")
 
+	def chart_filesize(self):
+		x_total = []
+		x_out = []
+		x_in = []
+		
+		mere = re.compile(self.ME)
+		
+		self.c.execute('SELECT filesize, msg_from, msg_to FROM mails')
+		for row in self.c:
+			fs = row[0]
+			x = fs
+			if mere.match(row[1]) is None or mere.match(row[2]) is not None:
+				# Mails to myself shouldn't be counted, they are either spam
+				# or "irrelevant" for my communication profile
+				x_in.append(x)
+			else:
+				x_out.append(x)
+			x_total.append(x)
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist([x_out, x_in], bins=30, color=['b', 'g'], label=['outgoing', 'incoming'], log=True)
+		plt.title("Mail size (distribution)")
+		ax.set_xlabel("bytes")
+		ax.set_ylabel("count")
+		plt.legend(loc=0)
+		plt.ylim(ymin=1)
+		plt.savefig(self.FILEPREFIX+"size.png")
+		
+	def chart_mailsperday(self):
+		self.c.execute('SELECT MIN(msg_time), MAX(msg_time) FROM mails')
+		firstmail, lastmail = self.c.fetchone()
+		x_out = []
+		x_in = []
+		day_out = {}
+		day_in = {}
+		
+		mere = re.compile(self.ME)
+		
+		self.c.execute('SELECT msg_time, msg_from, msg_to, msgid FROM mails WHERE msg_time > 0')
+		for row in self.c:
+			ts = row[0]
+			x = date.fromtimestamp(ts)
+			d = x.isoformat()
+			if mere.match(row[1]) is None or mere.match(row[2]) is not None:
+				# Mails to myself shouldn't be counted, they are either spam
+				# or "irrelevant" for my communication profile
+				if d in day_in:
+					day_in[d] += 1
+				else:
+					day_in[d] = 1
+			else:
+				if d in day_out:
+					day_out[d] += 1
+				else:
+					day_out[d] = 1
+
+		for single_date in daterange(date.fromtimestamp(firstmail), date.fromtimestamp(lastmail)):
+			d = single_date.isoformat()
+			if d in day_in:
+				x_in.append(day_in[d])
+			else:
+				x_in.append(0)
+			if d in day_out:
+				x_out.append(day_out[d])
+			else:
+				x_out.append(0)
+			
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked', log=False)
+		plt.title("Mails per day")
+		ax.set_xlabel("count")
+		ax.set_ylabel("days")
+		plt.xlim(0, 50)
+		plt.legend(loc=0)
+		plt.savefig(self.FILEPREFIX+"perday.png")
 		
 	def create(self):		
 		self.chart_date_time()
+		self.chart_filesize()
+		self.chart_mailsperday()
 			
 	def __init__(self, FILE, FILEPREFIX, ME):
 		self.FILEPREFIX = FILEPREFIX
