@@ -1,20 +1,30 @@
 #!/bin/sh
 cd email.maildir
 
-echo email data
+echo Mail
+echo Scan
 ./scan
+echo Generate Charts
 ./charts
+echo Done.
 cd ..
 
-echo Last.fm data
+echo Last.fm
 cd music.lastfm
+echo Download
 ./download
+echo Generate charts
+./charts
+echo Done.
 cd ..
 
-echo Twitter data
+echo Twitter
 cd microblog.twitter
+echo Downloads
 ./download
+echo Generate Starts
 ./charts
+echo Done.
 cd ..
 
 echo All done!
