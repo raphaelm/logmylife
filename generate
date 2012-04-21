@@ -3,6 +3,7 @@ cd email.maildir
 
 echo email data
 ./scan
+./charts
 cd ..
 
 echo Last.fm data
@@ -13,6 +14,7 @@ cd ..
 echo Twitter data
 cd microblog.twitter
 ./download
+./charts
 cd ..
 
 echo All done!

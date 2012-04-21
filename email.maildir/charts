@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+ACCOUNT = "raphaelmichel95.gmail.com"
+FILE = "%s.maildir.sqlite.db" % ACCOUNT
+FILEPREFIX = "%s.maildir.chart." % ACCOUNT
+
+ME = "(raphaelmichel95@(googlemail|gmail).com|.+@raphaelmichel.de|michel@schlusen.net|rami@daquel.de|raphaelm@php.net|raphael@geeksfactory.de)"
+
+
+import sqlite3
+import os
+import re
+from datetime import date, datetime, time
+
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import matplotlib.dates as md
+	
+class MailDirCharts:
+		
+	def chart_date_time(self):
+		
+		x_total = []
+		y_total = []
+		x_out = []
+		y_out = []
+		x_in = []
+		y_in = []
+		
+		mere = re.compile(self.ME)
+		
+		self.c.execute('SELECT msg_time, msg_from, msg_to, msgid FROM mails WHERE msg_time > 0')
+		for row in self.c:
+			ts = row[0]
+			x = date.fromtimestamp(ts)
+			y = (ts % (3600*24))/3600
+			if mere.match(row[1]) is None or mere.match(row[2]) is not None:
+				# Mails to myself shouldn't be counted, they are either spam
+				# or "irrelevant" for my communication profile
+				x_in.append(x)
+				y_in.append(y)
+			else:
+				x_out.append(x)
+				y_out.append(y)
+			x_total.append(x)
+			y_total.append(y)
+			
+			
+			
+		# Total Scatter
+		plt.clf()
+		ax = plt.subplot(111)
+		x_total = md.date2num(x_total)
+		plt.scatter(x_in, y_in, s=3, marker=(0,3,0), linewidths=0, c='g', label='Incoming')
+		plt.scatter(x_out, y_out, s=3, marker=(0,3,0), linewidths=0, c='b', label='Outgoing')
+		plt.legend(loc=3)
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.axis([min(x_total), max(x_total), 0, 24])
+		plt.title("Mail (total)")
+		ax.xaxis_date()
+		plt.yticks(range(0, 25))
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		ax.set_ylabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_total.png")
+			
+		# Total Histogram
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
+		plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
+		plt.xlim(0,24)
+		plt.legend(loc=0)
+		plt.title("Mail distribution (total)")
+		plt.xticks(range(0, 25))
+		ax.set_xlabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_total.hist.png")
+			
+		# Incoming Scatter
+		plt.clf()
+		ax = plt.subplot(111)
+		x_in = md.date2num(x_in)
+		plt.scatter(x_in, y_in, s=3, marker=(0,3,0), linewidths=0, c='g')
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.axis([min(x_total), max(x_total), 0, 24])
+		plt.title("Mail (incoming)")
+		ax.xaxis_date()
+		plt.yticks(range(0, 25))
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		ax.set_ylabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_in.png")
+			
+		# Incoming Histogram
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
+		plt.xlim(0,24)
+		plt.title("Mail distribution (incoming)")
+		plt.xticks(range(0, 25))
+		ax.set_xlabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_in.hist.png")
+			
+		# Outgoing Scatter
+		plt.clf()
+		ax = plt.subplot(111)
+		x_out = md.date2num(x_out)
+		plt.scatter(x_out, y_out, s=3, marker=(0,3,0), linewidths=0, c='b')
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.axis([min(x_total), max(x_total), 0, 24])
+		plt.title("Mail (outgoing)")
+		ax.xaxis_date()
+		plt.yticks(range(0, 25))
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		ax.set_ylabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_out.png")
+			
+		# Outgoing Histogram
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
+		plt.xlim(0,24)
+		plt.title("Mail distribution (outgoing)")
+		plt.xticks(range(0, 25))
+		ax.set_xlabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times_out.hist.png")
+
+		
+	def create(self):		
+		self.chart_date_time()
+			
+	def __init__(self, FILE, FILEPREFIX, ME):
+		self.FILEPREFIX = FILEPREFIX
+		self.FILE = FILE
+		self.ME = ME
+		
+		if os.path.exists(FILE):
+			self.conn = sqlite3.connect(FILE)
+			self.c = self.conn.cursor()
+		else:
+			print "Database not found!"
+			sys.exit()
+		self.conn.text_factory = str
+		
+c = MailDirCharts(FILE, FILEPREFIX, ME)
+c.create()
+

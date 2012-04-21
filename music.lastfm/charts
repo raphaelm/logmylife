@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+USER = "rami95"
+FILE = "%s.lastfm.sqlite.db" % USER
+FILEPREFIX = "%s.lastfm.chart." % USER
+
+
+import sqlite3
+import os
+from datetime import date, datetime, time
+
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import matplotlib.dates as md
+from numpy import arange
+	
+class MusicCharts:
+		
+	def chart_date_time(self):
+		
+		x_total = []
+		y_total = []
+		
+		self.c.execute('SELECT timestamp FROM tracks')
+		for row in self.c:
+			ts = row[0]
+			x = date.fromtimestamp(ts)
+			y = (ts % (3600*24))/3600
+			x_total.append(x)
+			y_total.append(y)
+			
+		# Tracks Scatter
+		plt.clf()
+		ax = plt.subplot(111)
+		x_total = md.date2num(x_total)
+		plt.scatter(x_total, y_total, s=2, marker=(0,3,0), linewidths=0)
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		min_t = min(x_total)
+		max_t = max(x_total)
+		plt.axis([min_t, max_t, 0, 24])
+		plt.title("Listening to music")
+		ax.xaxis_date()
+		plt.yticks(range(0, 25))
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		ax.set_ylabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times.png")
+			
+		# Tracks Histogram
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(y_total, bins=range(0,25))
+		plt.xlim(0,24)
+		plt.title("Listening to music (distribution)")
+		plt.xticks(range(0, 25))
+		ax.set_xlabel("time of day")
+		plt.savefig(self.FILEPREFIX+"times.hist.png")
+
+		
+	def create(self):		
+		self.chart_date_time()
+			
+	def __init__(self, FILE, FILEPREFIX):
+		self.FILEPREFIX = FILEPREFIX
+		self.FILE = FILE
+		
+		if os.path.exists(FILE):
+			self.conn = sqlite3.connect(FILE)
+			self.c = self.conn.cursor()
+		else:
+			print "Database not found!"
+			sys.exit()
+		self.conn.text_factory = str
+		
+c = MusicCharts(FILE, FILEPREFIX)
+c.create()
+

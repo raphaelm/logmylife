@@ -21,7 +21,7 @@ class ScanMailDir:
 		fp.close()
 		d = email.utils.parsedate(r.get("Date"))
 		msgid = r.get("Message-ID")
-		if d is not None:
+		if d is not None and r.get("X-Autoreply") != "yes":
 			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto) VALUES (?,?,?,?,?,?)",
 				(
 					msgid,
