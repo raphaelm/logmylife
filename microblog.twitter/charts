@@ -8,12 +8,16 @@ FILEPREFIX = "%s.twitter.chart." % USER
 
 import sqlite3
 import os
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from numpy import arange
+	
+def daterange(start_date, end_date):
+	for n in range((end_date - start_date).days):
+		yield start_date + timedelta(n)
 	
 class TwitterCharts:
 		
@@ -56,10 +60,81 @@ class TwitterCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
+		
+	def chart_tweetsperday(self):
+		self.c.execute('SELECT MIN(timestamp), MAX(timestamp) FROM tweets')
+		firstt, lastt = self.c.fetchone()
+		x = []
+		days = []
+		day = {}
+		month = 0
+		months = []
+		x_months = []
+		
+		self.c.execute('SELECT timestamp FROM tweets WHERE timestamp > 0')
+		for row in self.c:
+			ts = row[0]
+			d = date.fromtimestamp(ts).isoformat()
+			if d in day:
+				day[d] += 1
+			else:
+				day[d] = 1
+
+		for single_date in daterange(date.fromtimestamp(firstt), date.fromtimestamp(lastt)):
+			days.append(single_date)
+			d = single_date.isoformat()
+			if d[0:7] != month:
+				month = d[0:7]
+				months.append(single_date)
+				x_months.append([0,0])
+				
+			if d in day:
+				x.append(day[d])
+				x_months[len(x_months)-1][0] += day[d]
+			else:
+				x.append(0)
+			x_months[len(x_months)-1][1] += 1
+		
+		days = md.date2num(days)
+		months = md.date2num(months)
+		x_months = [float(_x[0])/float(_x[1]) for _x in x_months]
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(x, bins=30, color='b')
+		plt.title("Tweets per day (distribution)")
+		ax.set_xlabel("count")
+		ax.set_ylabel("days")
+		plt.savefig(self.FILEPREFIX+"perday.hist.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.plot(days, x)
+		plt.title("Tweets per day")
+		ax.set_ylabel("count")
+		ax.xaxis_date()
+		plt.axis([min(days), max(days), 0, max(x)+5])
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.savefig(self.FILEPREFIX+"perday.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.plot(months, x_months)
+		plt.title("Tweets per day (averaged by month)")
+		ax.set_ylabel("count")
+		ax.xaxis_date()
+		plt.axis([min(months), max(months), 0, max(x_months)+5])
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		labels = ax.get_xticklabels()
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.savefig(self.FILEPREFIX+"perday.avg.png")
 
 		
 	def create(self):		
 		self.chart_date_time()
+		self.chart_tweetsperday()
 			
 	def __init__(self, FILE, FILEPREFIX):
 		self.FILEPREFIX = FILEPREFIX

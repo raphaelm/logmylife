@@ -174,6 +174,11 @@ class MailDirCharts:
 		x_in = []
 		day_out = {}
 		day_in = {}
+		days = []
+		month = 0
+		months = []
+		x_months_in = []
+		x_months_out = []
 		
 		mere = re.compile(self.ME)
 		
@@ -196,25 +201,72 @@ class MailDirCharts:
 					day_out[d] = 1
 
 		for single_date in daterange(date.fromtimestamp(firstmail), date.fromtimestamp(lastmail)):
+			days.append(single_date)
 			d = single_date.isoformat()
+				
+			if d[0:7] != month:
+				month = d[0:7]
+				months.append(single_date)
+				x_months_in.append([0,0])
+				x_months_out.append([0,0])
+				
 			if d in day_in:
 				x_in.append(day_in[d])
+				x_months_in[len(x_months_in)-1][0] += day_in[d]
 			else:
 				x_in.append(0)
 			if d in day_out:
 				x_out.append(day_out[d])
+				x_months_out[len(x_months_out)-1][0] += day_out[d]
 			else:
 				x_out.append(0)
+			x_months_in[len(x_months_in)-1][1] += 1
+			x_months_out[len(x_months_out)-1][1] += 1
 			
+		days = md.date2num(days)
+		months = md.date2num(months)
+		x_months_out = [float(_x[0])/float(_x[1]) for _x in x_months_out]
+		x_months_in = [float(_x[0])/float(_x[1]) for _x in x_months_in]
+		
+		print md.num2date(days[x_in.index(max(x_in))])
+		
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked', log=False)
-		plt.title("Mails per day")
+		plt.title("Mails per day (distribution)")
 		ax.set_xlabel("count")
 		ax.set_ylabel("days")
 		plt.xlim(0, 50)
 		plt.legend(loc=0)
+		plt.savefig(self.FILEPREFIX+"perday.hist.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.plot(days, x_out, 'b', label='outgoing')
+		plt.plot(days, x_in, 'g', label='incoming')
+		plt.title("Mails per day")
+		ax.set_ylabel("count")
+		ax.xaxis_date()
+		plt.axis([min(days), max(days), 0, max((max(x_in), max(x_out)))+5])
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		labels = ax.get_xticklabels()
+		plt.legend(loc=0)
+		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.plot(months, x_months_out, 'b', label='outgoing')
+		plt.plot(months, x_months_in, 'g', label='incoming')
+		plt.title("Mails per day (averaged by month)")
+		ax.set_ylabel("count")
+		ax.xaxis_date()
+		plt.axis([min(months), max(months), 0, max((max(x_months_in), max(x_months_out)))+5])
+		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
+		labels = ax.get_xticklabels()
+		plt.legend(loc=0)
+		plt.setp(labels, rotation=30, fontsize=10)
+		plt.savefig(self.FILEPREFIX+"perday.avg.png")
 		
 	def create(self):		
 		self.chart_date_time()
