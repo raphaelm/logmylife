@@ -3,9 +3,13 @@
 Downloads all your track history from last.fm and exports it into
 a sqlite3 database file.
 """
+import time
+import datetime
+
 USER = "rami95"
 FILE = "%s.lastfm.sqlite.db" % USER
 APIK = "b8258575158335e66482df0777e5b331"
+OFFSET = time.mktime(datetime.datetime(2010,01,01).timetuple())
 
 import os
 import sqlite3
@@ -18,12 +22,12 @@ if os.path.exists(FILE):
 	c.execute('SELECT MAX(timestamp) FROM tracks')
 	last = c.fetchone()[0]
 	if last is None:
-		last = 0
+		last = OFFSET
 else:
 	conn = sqlite3.connect(FILE)
 	c = conn.cursor()
 	c.execute('''CREATE TABLE tracks (artist text, name text, album text, timestamp real)''')
-	last = 0
+	last = OFFSET
 
 # Check number of Pages
 f = urllib.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=0&from=%d" % (USER, APIK, last))
@@ -48,7 +52,7 @@ if total > 0:
 				c.execute("INSERT INTO tracks (artist, name, album, timestamp) VALUES (?,?,?,?)",
 					(artist, name, album, timestamp))
 		conn.commit()
-		print("%d%% downloaded" % int((page/totalPages)*100))
+		print("%d%% downloaded" % int((float(page)/float(totalPages))*100))
 			
 else:
 	print("Nothing to do. Listen to more music!")
