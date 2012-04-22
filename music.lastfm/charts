@@ -51,6 +51,7 @@ class MusicCharts:
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.png")
+		self.charts.append(self.FILEPREFIX+"times.png")
 			
 		# Tracks Histogram
 		plt.clf()
@@ -61,6 +62,7 @@ class MusicCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
+		self.charts.append(self.FILEPREFIX+"times.hist.png")
 		
 	def chart_tracksperday(self):
 		self.c.execute('SELECT MIN(timestamp), MAX(timestamp) FROM tracks')
@@ -102,14 +104,6 @@ class MusicCharts:
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist(x, bins=30, color='b')
-		plt.title("Tracks played per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
-		plt.savefig(self.FILEPREFIX+"perday.hist.png")
-		
-		plt.clf()
-		ax = plt.subplot(111)
 		plt.plot(days, x)
 		plt.title("Tracks played per day")
 		ax.set_ylabel("count")
@@ -119,6 +113,7 @@ class MusicCharts:
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.png")
+		self.charts.append(self.FILEPREFIX+"perday.png")
 		
 		plt.clf()
 		ax = plt.subplot(111)
@@ -131,6 +126,16 @@ class MusicCharts:
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.avg.png")
+		self.charts.append(self.FILEPREFIX+"perday.avg.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(x, bins=30, color='b')
+		plt.title("Tracks played per day (distribution)")
+		ax.set_xlabel("count")
+		ax.set_ylabel("days")
+		plt.savefig(self.FILEPREFIX+"perday.hist.png")
+		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
 	def chart_toptracks_range(self, start = 0, label = "total", n = 20):
 		artists = []
@@ -147,7 +152,8 @@ class MusicCharts:
 		plt.subplots_adjust(left=0.25, right=0.9)
 		plt.title("Top tracks ("+label+")")
 		ax.set_xlabel("times played")
-		plt.savefig(self.FILEPREFIX+"topatracks."+label+".png")
+		plt.savefig(self.FILEPREFIX+"toptracks."+label+".png")
+		self.charts.append(self.FILEPREFIX+"toptracks."+label+".png")
 		
 	def charts_toptracks(self):
 		self.chart_toptracks_range(0, "total")
@@ -171,6 +177,7 @@ class MusicCharts:
 		plt.title("Top artists ("+label+")")
 		ax.set_xlabel("tracks played")
 		plt.savefig(self.FILEPREFIX+"topartists."+label+".png")
+		self.charts.append(self.FILEPREFIX+"topartists."+label+".png")
 		
 	def charts_topartists(self):
 		self.chart_topartists_range(0, "total")
@@ -178,11 +185,25 @@ class MusicCharts:
 		self.chart_topartists_range(time.time()-3600*24*31, "last month")
 		self.chart_topartists_range(time.time()-3600*24*365, "last year")
 		
+	def create_simple_html(self):
+		global USER
+		html = "<html><head>"
+		html += "<title>Last.fm statistics for %s</title>" % USER
+		html += "</head><body><a href='../'>Overview</a><br />"
+		for c in self.charts:
+			html += "<img src='"+c+"' /><br />"
+		html += "</body></html>"
+		f = open(self.FILEPREFIX+"all.html", "w")
+		f.write(html)
+		f.close()
+		
 	def create(self):		
+		self.charts = []
 		self.chart_date_time()
 		self.chart_tracksperday()
 		self.charts_topartists()
 		self.charts_toptracks()
+		self.create_simple_html()
 			
 	def __init__(self, FILE, FILEPREFIX):
 		self.FILEPREFIX = FILEPREFIX

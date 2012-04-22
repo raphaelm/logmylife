@@ -50,6 +50,7 @@ class TwitterCharts:
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.png")
+		self.charts.append(self.FILEPREFIX+"times.png")
 			
 		# Tweets Histogram
 		plt.clf()
@@ -60,6 +61,7 @@ class TwitterCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
+		self.charts.append(self.FILEPREFIX+"times.hist.png")
 		
 	def chart_tweetsperday(self):
 		self.c.execute('SELECT MIN(timestamp), MAX(timestamp) FROM tweets')
@@ -101,14 +103,6 @@ class TwitterCharts:
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist(x, bins=30, color='b')
-		plt.title("Tweets per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
-		plt.savefig(self.FILEPREFIX+"perday.hist.png")
-		
-		plt.clf()
-		ax = plt.subplot(111)
 		plt.plot(days, x)
 		plt.title("Tweets per day")
 		ax.set_ylabel("count")
@@ -118,6 +112,7 @@ class TwitterCharts:
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.png")
+		self.charts.append(self.FILEPREFIX+"perday.png")
 		
 		plt.clf()
 		ax = plt.subplot(111)
@@ -130,9 +125,18 @@ class TwitterCharts:
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.avg.png")
+		self.charts.append(self.FILEPREFIX+"perday.avg.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist(x, bins=30, color='b')
+		plt.title("Tweets per day (distribution)")
+		ax.set_xlabel("count")
+		ax.set_ylabel("days")
+		plt.savefig(self.FILEPREFIX+"perday.hist.png")
+		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
 	def chart_tweetswithlink(self):
-		
 		self.c.execute('SELECT COUNT(*) FROM tweets')
 		cnt = self.c.fetchone()[0]
 		self.c.execute('SELECT COUNT(*) FROM tweets WHERE text LIKE "%http://%" OR text LIKE "%https://%"')
@@ -144,12 +148,26 @@ class TwitterCharts:
 		plt.pie((cnt_link, cnt-cnt_link), labels=('Tweets with a link', 'Tweets without a link'), autopct='%1.1f%%', shadow=True)
 		plt.title("Links in tweets")
 		plt.savefig(self.FILEPREFIX+"links.png")
-
+		self.charts.append(self.FILEPREFIX+"links.png")
+		
+	def create_simple_html(self):
+		global USER
+		html = "<html><head>"
+		html += "<title>Twitter statistics for %s</title>" % USER
+		html += "</head><body><a href='../'>Overview</a><br />"
+		for c in self.charts:
+			html += "<img src='"+c+"' /><br />"
+		html += "</body></html>"
+		f = open(self.FILEPREFIX+"all.html", "w")
+		f.write(html)
+		f.close()
 		
 	def create(self):		
+		self.charts = []
 		self.chart_date_time()
 		self.chart_tweetsperday()
 		self.chart_tweetswithlink()
+		self.create_simple_html()
 			
 	def __init__(self, FILE, FILEPREFIX):
 		self.FILEPREFIX = FILEPREFIX

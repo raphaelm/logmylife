@@ -74,6 +74,7 @@ class MailDirCharts:
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_total.png")
+		self.charts.append(self.FILEPREFIX+"times_total.png")
 			
 		# Total Histogram
 		plt.clf()
@@ -87,6 +88,7 @@ class MailDirCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_total.hist.png")
+		self.charts.append(self.FILEPREFIX+"times_total.hist.png")
 			
 		# Incoming Scatter
 		plt.clf()
@@ -102,6 +104,7 @@ class MailDirCharts:
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_in.png")
+		self.charts.append(self.FILEPREFIX+"times_in.png")
 			
 		# Incoming Histogram
 		plt.clf()
@@ -112,6 +115,7 @@ class MailDirCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_in.hist.png")
+		self.charts.append(self.FILEPREFIX+"times_in.hist.png")
 			
 		# Outgoing Scatter
 		plt.clf()
@@ -127,6 +131,7 @@ class MailDirCharts:
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_out.png")
+		self.charts.append(self.FILEPREFIX+"times_out.png")
 			
 		# Outgoing Histogram
 		plt.clf()
@@ -137,6 +142,7 @@ class MailDirCharts:
 		plt.xticks(range(0, 25))
 		ax.set_xlabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times_out.hist.png")
+		self.charts.append(self.FILEPREFIX+"times_out.hist.png")
 
 	def chart_filesize(self):
 		x_total = []
@@ -166,6 +172,7 @@ class MailDirCharts:
 		plt.legend(loc=0)
 		plt.ylim(ymin=1)
 		plt.savefig(self.FILEPREFIX+"size.png")
+		self.charts.append(self.FILEPREFIX+"size.png")
 		
 	def chart_mailsperday(self):
 		self.c.execute('SELECT MIN(msg_time), MAX(msg_time) FROM mails')
@@ -228,18 +235,6 @@ class MailDirCharts:
 		x_months_out = [float(_x[0])/float(_x[1]) for _x in x_months_out]
 		x_months_in = [float(_x[0])/float(_x[1]) for _x in x_months_in]
 		
-		print md.num2date(days[x_in.index(max(x_in))])
-		
-		plt.clf()
-		ax = plt.subplot(111)
-		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked', log=False)
-		plt.title("Mails per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
-		plt.xlim(0, 50)
-		plt.legend(loc=0)
-		plt.savefig(self.FILEPREFIX+"perday.hist.png")
-		
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.plot(days, x_out, 'b', label='outgoing')
@@ -253,6 +248,7 @@ class MailDirCharts:
 		plt.legend(loc=0)
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.png")
+		self.charts.append(self.FILEPREFIX+"perday.png")
 		
 		plt.clf()
 		ax = plt.subplot(111)
@@ -267,11 +263,37 @@ class MailDirCharts:
 		plt.legend(loc=0)
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.avg.png")
+		self.charts.append(self.FILEPREFIX+"perday.avg.png")
+		
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked', log=False)
+		plt.title("Mails per day (distribution)")
+		ax.set_xlabel("count")
+		ax.set_ylabel("days")
+		plt.xlim(0, 50)
+		plt.legend(loc=0)
+		plt.savefig(self.FILEPREFIX+"perday.hist.png")
+		self.charts.append(self.FILEPREFIX+"perday.hist.png")
+		
+	def create_simple_html(self):
+		global ACCOUNT
+		html = "<html><head>"
+		html += "<title>E-Mail statistics for %s</title>" % ACCOUNT
+		html += "</head><body><a href='../'>Overview</a><br />"
+		for c in self.charts:
+			html += "<img src='"+c+"' /><br />"
+		html += "</body></html>"
+		f = open(self.FILEPREFIX+"all.html", "w")
+		f.write(html)
+		f.close()
 		
 	def create(self):		
+		self.charts = []
 		self.chart_date_time()
 		self.chart_filesize()
 		self.chart_mailsperday()
+		self.create_simple_html()
 			
 	def __init__(self, FILE, FILEPREFIX, ME):
 		self.FILEPREFIX = FILEPREFIX
