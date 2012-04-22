@@ -130,11 +130,26 @@ class TwitterCharts:
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.savefig(self.FILEPREFIX+"perday.avg.png")
+		
+	def chart_tweetswithlink(self):
+		
+		self.c.execute('SELECT COUNT(*) FROM tweets')
+		cnt = self.c.fetchone()[0]
+		self.c.execute('SELECT COUNT(*) FROM tweets WHERE text LIKE "%http://%" OR text LIKE "%https://%"')
+		cnt_link = self.c.fetchone()[0]
+			
+		plt.clf()
+		plt.figure(figsize=(7,7))
+		ax = plt.subplot(111)
+		plt.pie((cnt_link, cnt-cnt_link), labels=('Tweets with a link', 'Tweets without a link'), autopct='%1.1f%%', shadow=True)
+		plt.title("Links in tweets")
+		plt.savefig(self.FILEPREFIX+"links.png")
 
 		
 	def create(self):		
 		self.chart_date_time()
 		self.chart_tweetsperday()
+		self.chart_tweetswithlink()
 			
 	def __init__(self, FILE, FILEPREFIX):
 		self.FILEPREFIX = FILEPREFIX
