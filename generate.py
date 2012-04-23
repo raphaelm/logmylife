@@ -51,7 +51,7 @@ class Generator(lml.base.Generator):
 		if download:
 			lml.music.DownloadLastFm(FILE, USER, APIK, OFFSET).download()
 		chart = lml.music.Charts(FILE, FILEPREFIX, USER).create()
-		self.charts.append((chart, "Last.fm: rami95"))
+		self.charts.append((chart, "Music (Last.fm): rami95"))
 		print "Music done."
 		
 def main():
