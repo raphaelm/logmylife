@@ -1,34 +1,70 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-ACCOUNT = "raphaelmichel95.gmail.com"
-FILE = "%s.maildir.sqlite.db" % ACCOUNT
-FILEPREFIX = "%s.maildir.chart." % ACCOUNT
-
-ME = "(raphaelmichel95@(googlemail|gmail).com|.+@raphaelmichel.de|michel@schlusen.net|rami@daquel.de|raphaelm@php.net|raphael@geeksfactory.de)"
-
-
 import sqlite3
 import os
 import re
-from datetime import date, datetime, time, timedelta
+import email.parser
+import email.utils
+import time
+import sys
+from datetime import date, datetime, timedelta
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-	
-	
-"""
-Ideas:
-	* Time until first response (me and others) (histogram)
-"""
 
-def daterange(start_date, end_date):
-	for n in range((end_date - start_date).days):
-		yield start_date + timedelta(n)
+from utils import daterange
+import base
 
-class MailDirCharts:
+class Scan(base.Scan):
+	def parsemail(self, f):
+		fp = open(f)
+		p = email.parser.Parser()
+		r = p.parse(fp)
+		fp.close()
+		d = email.utils.parsedate(r.get("Date"))
+		msgid = r.get("Message-ID")
+		if d is not None and r.get("X-Autoreply") != "yes":
+			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto, filesize) VALUES (?,?,?,?,?,?,?)",
+				(
+					msgid,
+					email.utils.parseaddr(r.get("To"))[1],
+					email.utils.parseaddr(r.get("From"))[1],
+					r.get("Content-Type", ""),
+					time.mktime(d),
+					r.get("In-Reply-To", ""),
+					os.path.getsize(f)
+				))
+			if self.i % 10 == 0:
+				sys.stdout.write("\r%05d mails scanned" % self.i)
+				sys.stdout.flush()
+				self.conn.commit()
+			self.i += 1
 		
+	def scan(self):		
+		for f in os.listdir(self.MDIR+'cur'):
+			self.parsemail(self.MDIR+'cur/'+f)
+			
+		for f in os.listdir(self.MDIR+'new'):
+			self.parsemail(self.MDIR+'new/'+f)
+		
+		print "\rScanned.                          "
+		self.conn.commit()
+		self.c.close()
+			
+			
+	def __init__(self, MDIR, FILE):
+		self.MDIR = MDIR
+		self.i = 0
+		print "Scanning maildir",
+		if os.path.exists(FILE):
+			self.conn = sqlite3.connect(FILE)
+			self.c = self.conn.cursor()
+		else:
+			self.conn = sqlite3.connect(FILE)
+			self.c = self.conn.cursor()
+			self.c.execute('''CREATE TABLE mails (msgid text unique on conflict ignore, msg_to text, msg_from text, contenttype text, msg_time real, replyto text, filesize real)''')
+		self.conn.text_factory = str
+		
+class Charts(base.Charts):
 	def chart_date_time(self):
 		
 		x_total = []
@@ -277,28 +313,30 @@ class MailDirCharts:
 		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
 	def create_simple_html(self):
-		global ACCOUNT
 		html = "<html><head>"
-		html += "<title>E-Mail statistics for %s</title>" % ACCOUNT
-		html += "</head><body><a href='../'>Overview</a><br />"
+		html += "<title>Email statistics for %s</title>" % self.ACCOUNT
+		html += "</head><body><h1>Email statistics for %s</h1><a href='./'>Overview</a><br />" % self.ACCOUNT
 		for c in self.charts:
-			html += "<img src='"+c+"' /><br />"
+			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
+		html += "generated %s" % date.today().isoformat()
 		html += "</body></html>"
 		f = open(self.FILEPREFIX+"all.html", "w")
 		f.write(html)
 		f.close()
+		return self.FILEPREFIX+"all.html"
 		
 	def create(self):		
 		self.charts = []
 		self.chart_date_time()
 		self.chart_filesize()
 		self.chart_mailsperday()
-		self.create_simple_html()
+		return self.create_simple_html()
 			
-	def __init__(self, FILE, FILEPREFIX, ME):
+	def __init__(self, FILE, FILEPREFIX, ME, ACCOUNT):
 		self.FILEPREFIX = FILEPREFIX
 		self.FILE = FILE
 		self.ME = ME
+		self.ACCOUNT = ACCOUNT
 		
 		if os.path.exists(FILE):
 			self.conn = sqlite3.connect(FILE)
@@ -307,7 +345,3 @@ class MailDirCharts:
 			print "Database not found!"
 			sys.exit()
 		self.conn.text_factory = str
-		
-c = MailDirCharts(FILE, FILEPREFIX, ME)
-c.create()
-

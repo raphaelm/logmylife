@@ -4,27 +4,10 @@ Remember Stephen Wolfram?[1]
 These are the tools I use to log. :-)
 
 
-Schema:
-
-    type.software/action
-
-    types:
-        * email
-            supported software:
-                * maildir[2]
-        * music
-            supported software
-                * last.fm
-        * microblog
-            supported software
-                * twitter (only the last 3200 tweets can be downloaded)
-
-    actions (in order of workflow):
-        * download - Collecting data from the internet
-        * scan - Collecting data from the local hard drive
-        * charts - Create awesome graphs and tables
-
-Basic storage format: SQLite3
+Currently supported:
+* E-Mails in maildir format[1]
+* Twitter (only the last 3,200 tweets can be downloaded, I'm sorry)
+* Music scrobbled to Last.fm
 
 
 [1] http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life/

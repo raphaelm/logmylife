@@ -1,29 +1,72 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-USER = "rami95"
-FILE = "%s.lastfm.sqlite.db" % USER
-FILEPREFIX = "%s.lastfm.chart." % USER
-
-
-import sqlite3
-import os
-from datetime import date, datetime, timedelta
 import time
+import os
+import sqlite3
+import urllib
+import xml.etree.ElementTree
+from datetime import date, datetime, timedelta
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-from numpy import arange
+
+import base
+from utils import daterange
+
+class DownloadLastFm(base.Download):
+	def __init__(self, FILE, USER, APIK, OFFSET):
+		self.FILE = FILE
+		self.USER = USER
+		self.APIK = APIK
+		self.OFFSET = OFFSET
+		
+	def download(self):
+		if os.path.exists(self.FILE):
+			conn = sqlite3.connect(self.FILE)
+			c = conn.cursor()
+			c.execute('SELECT MAX(timestamp) FROM tracks')
+			last = c.fetchone()[0]
+			if last is None:
+				last = self.OFFSET
+		else:
+			conn = sqlite3.connect(self.FILE)
+			c = conn.cursor()
+			c.execute('''CREATE TABLE tracks (artist text, name text, album text, timestamp real)''')
+			last = self.OFFSET
+
+		# Check number of Pages
+		f = urllib.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=0&from=%d" % (self.USER, self.APIK, last))
+		tree = xml.etree.ElementTree.fromstring(f.read())
+		rt = tree.find("recenttracks")
+		total = int(rt.attrib['total'])
+		totalPages = int(rt.attrib['totalPages'])
+
+		if total > 0:
+			for page in range(1,totalPages+1):
+				f = urllib.urlopen("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=%s&api_key=%s&limit=200&page=%d&from=%d" % (self.USER, self.APIK, page, last))
+				tree = xml.etree.ElementTree.fromstring(f.read())
+				rt = tree.find("recenttracks")
+				for track in rt.iter("track"):
+					artist = track.find("artist").text
+					name = track.find("name").text
+					album = track.find("album").text
+					if "nowplaying" in track.attrib and track.attrib["nowplaying"] == "true":
+						continue # We get to that later.
+					else:
+						timestamp = int(track.find("date").attrib['uts'])
+						c.execute("INSERT INTO tracks (artist, name, album, timestamp) VALUES (?,?,?,?)",
+							(artist, name, album, timestamp))
+				conn.commit()
+				print("%d%% downloaded" % int((float(page)/float(totalPages))*100))
+					
+		else:
+			print("Nothing to do. Listen to more music!")
+
+		c.close()
+		conn.close()
+		
+class Charts(base.Charts):
 	
-def daterange(start_date, end_date):
-	for n in range((end_date - start_date).days):
-		yield start_date + timedelta(n)
-		
-class MusicCharts:
-		
 	def chart_date_time(self):
-		
 		x_total = []
 		y_total = []
 		
@@ -186,16 +229,17 @@ class MusicCharts:
 		self.chart_topartists_range(time.time()-3600*24*365, "last year")
 		
 	def create_simple_html(self):
-		global USER
 		html = "<html><head>"
-		html += "<title>Last.fm statistics for %s</title>" % USER
-		html += "</head><body><a href='../'>Overview</a><br />"
+		html += "<title>Last.fm statistics for %s</title>" % self.USER
+		html += "</head><body><h1>Last.fm statistics for %s</h1><a href='./'>Overview</a><br />" % self.USER
 		for c in self.charts:
-			html += "<img src='"+c+"' /><br />"
+			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
+		html += "generated %s" % date.today().isoformat()
 		html += "</body></html>"
 		f = open(self.FILEPREFIX+"all.html", "w")
 		f.write(html)
 		f.close()
+		return self.FILEPREFIX+"all.html"
 		
 	def create(self):		
 		self.charts = []
@@ -203,11 +247,12 @@ class MusicCharts:
 		self.chart_tracksperday()
 		self.charts_topartists()
 		self.charts_toptracks()
-		self.create_simple_html()
+		return self.create_simple_html()
 			
-	def __init__(self, FILE, FILEPREFIX):
+	def __init__(self, FILE, FILEPREFIX, USER):
 		self.FILEPREFIX = FILEPREFIX
 		self.FILE = FILE
+		self.USER = USER
 		
 		if os.path.exists(FILE):
 			self.conn = sqlite3.connect(FILE)
@@ -216,7 +261,3 @@ class MusicCharts:
 			print "Database not found!"
 			sys.exit()
 		self.conn.text_factory = str
-		
-c = MusicCharts(FILE, FILEPREFIX)
-c.create()
-

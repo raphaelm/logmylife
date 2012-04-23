@@ -1,5 +1,5 @@
 *.tmp
 *~
-*.sqlite.db
-*.sqlite.db-journal
-*.chart*.png
+data/
+*.pyc
+charts/

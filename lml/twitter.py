@@ -1,28 +1,69 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-USER = "_rami_"
-FILE = "%s.twitter.sqlite.db" % USER
-FILEPREFIX = "%s.twitter.chart." % USER
-
-
-import sqlite3
 import os
-from datetime import date, datetime, time, timedelta
+import sqlite3
+import urllib
+import json
+import email.utils
+import time
+from datetime import date, datetime, timedelta, tzinfo
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-from numpy import arange
-	
-def daterange(start_date, end_date):
-	for n in range((end_date - start_date).days):
-		yield start_date + timedelta(n)
-	
-class TwitterCharts:
+
+from utils import daterange
+import base
 		
+class Download(base.Download):
+	def __init__(self, FILE, USER):
+		self.FILE = FILE
+		self.USER = USER
+		
+	def download(self):
+		if os.path.exists(self.FILE):
+			conn = sqlite3.connect(self.FILE)
+			c = conn.cursor()
+			c.execute('SELECT MAX(id) FROM tweets')
+			last = c.fetchone()[0]
+			if last is None:
+				last = 0
+		else:
+			conn = sqlite3.connect(self.FILE)
+			c = conn.cursor()
+			c.execute('''CREATE TABLE tweets (id text unique on conflict ignore, text text, timestamp real)''')
+			last = 0
+
+		maxid = ''
+		for page in range(1,17): # Absolute limit by twitter :(
+			if page == 1:
+				if last != 0:
+					f = urllib.urlopen("https://api.twitter.com/1/statuses/user_timeline.json?include_entities=true&include_rts=false&trim_user=1&screen_name=%s&count=200&since_id=%s" % (self.USER, last))
+				else:
+					f = urllib.urlopen("https://api.twitter.com/1/statuses/user_timeline.json?include_entities=true&include_rts=false&trim_user=1&screen_name=%s&count=200" % (self.USER))
+			else:
+				if last != 0:
+					f = urllib.urlopen("https://api.twitter.com/1/statuses/user_timeline.json?include_entities=true&include_rts=false&trim_user=1&screen_name=%s&count=200&since_id=%s&max_id=%s" % (self.USER, last, maxid))
+				else:
+					f = urllib.urlopen("https://api.twitter.com/1/statuses/user_timeline.json?include_entities=true&include_rts=false&trim_user=1&screen_name=%s&count=200&max_id=%s" % (self.USER, maxid))
+
+			tree = json.loads(f.read())
+			if len(tree) == 0:
+				break
+			else:
+				for tweet in tree:
+					timestamp = time.mktime(email.utils.parsedate(tweet['created_at']))
+					c.execute("INSERT INTO tweets (id, text, timestamp) VALUES (?,?,?)",
+						(tweet['id'], tweet['text'], timestamp))
+				maxid = tweet['id']
+			conn.commit()
+			print("%d pages downloaded" % page)
+
+		c.close()
+		conn.close()
+
+
+class Charts(base.Charts):
+	
 	def chart_date_time(self):
-		
 		x_total = []
 		y_total = []
 		
@@ -151,27 +192,29 @@ class TwitterCharts:
 		self.charts.append(self.FILEPREFIX+"links.png")
 		
 	def create_simple_html(self):
-		global USER
 		html = "<html><head>"
-		html += "<title>Twitter statistics for %s</title>" % USER
-		html += "</head><body><a href='../'>Overview</a><br />"
+		html += "<title>Twitter statistics for %s</title>" % self.USER
+		html += "</head><body><h1>Twitter statistics for %s</h1><a href='./'>Overview</a><br />" % self.USER
 		for c in self.charts:
-			html += "<img src='"+c+"' /><br />"
+			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
+		html += "generated %s" % date.today().isoformat()
 		html += "</body></html>"
 		f = open(self.FILEPREFIX+"all.html", "w")
 		f.write(html)
 		f.close()
+		return self.FILEPREFIX+"all.html"
 		
 	def create(self):		
 		self.charts = []
 		self.chart_date_time()
 		self.chart_tweetsperday()
 		self.chart_tweetswithlink()
-		self.create_simple_html()
+		return self.create_simple_html()
 			
-	def __init__(self, FILE, FILEPREFIX):
+	def __init__(self, FILE, FILEPREFIX, USER):
 		self.FILEPREFIX = FILEPREFIX
 		self.FILE = FILE
+		self.USER = USER
 		
 		if os.path.exists(FILE):
 			self.conn = sqlite3.connect(FILE)
@@ -180,7 +223,3 @@ class TwitterCharts:
 			print "Database not found!"
 			sys.exit()
 		self.conn.text_factory = str
-		
-c = TwitterCharts(FILE, FILEPREFIX)
-c.create()
-
