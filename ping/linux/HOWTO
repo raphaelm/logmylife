@@ -1,0 +1,3 @@
+Add the following line to your /etc/crontab:
+	
+*/10 * * * * 1000 wget "http://www.raphaelmichel.de/stats/pingserver/recieve.php?key=<some-key>&device=<device-label>" -O /dev/null >/dev/null 2>&1
