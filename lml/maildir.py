@@ -11,6 +11,8 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 
+import numpy as np
+
 from utils import daterange
 import base
 
@@ -312,6 +314,53 @@ class Charts(base.Charts):
 		plt.savefig(self.FILEPREFIX+"perday.hist.png")
 		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
+	def chart_responsetime(self):
+		mere = re.compile(self.ME)
+		x_in = []
+		x_out = []
+		self.c.execute('SELECT m.msg_time, m.msg_from, m.msg_to, r.msg_from, r.msg_to, r.msg_time FROM mails m INNER JOIN mails r ON r.msgid = m.replyto WHERE m.msg_time > 0 AND m.replyto != "" AND r.replyto = ""')
+		for row in self.c:
+			x = row[0]-row[5]
+			if mere.match(row[1]) is None and mere.match(row[2]) is not None:
+				# Mails to myself shouldn't be counted, they are either spam
+				# or "irrelevant" for my communication profile
+				x_in.append(x)
+			elif mere.match(row[1]) is not None and mere.match(row[2]) is not None:
+				x_out.append(x)
+			
+		ind = np.arange(6)
+		width = 0.38
+			
+		lx = float(len(x_in))
+		r_in = (
+			len([x for x in x_in if x < 60*5])/lx,
+			len([x for x in x_in if x < 60*15 and x >= 60*5])/lx,
+			len([x for x in x_in if x < 3600 and x >= 60*15])/lx,
+			len([x for x in x_in if x < 3600*4 and x >= 3600])/lx,
+			len([x for x in x_in if x < 3600*25 and x >= 3600*4])/lx,
+			len([x for x in x_in if x >= 3600*25])/lx
+		)
+		lx = float(len(x_out))
+		r_out = (
+			len([x for x in x_out if x < 60*5])/lx,
+			len([x for x in x_out if x < 60*15 and x >= 60*5])/lx,
+			len([x for x in x_out if x < 3600 and x >= 60*15])/lx,
+			len([x for x in x_out if x < 3600*4 and x >= 3600])/lx,
+			len([x for x in x_out if x < 3600*25 and x >= 3600*4])/lx,
+			len([x for x in x_out if x >= 3600*25])/lx
+		)
+			
+		plt.clf()
+		ax = plt.subplot(111)
+		plt.bar(ind, r_out, width, color='b', label='When I answer')
+		plt.bar(ind+width, r_in, width, color='g', label='When other people answer')
+		plt.title("Time before first response")
+		plt.ylabel("count")
+		plt.xticks(ind+width, ('< 5min', '< 15min', '< 1hr', '< 4hrs', '< 1day', 'more'))
+		plt.legend(loc=0)
+		plt.savefig(self.FILEPREFIX+"responsetime.hist.png")
+		self.charts.append(self.FILEPREFIX+"responsetime.hist.png")
+		
 	def create_simple_html(self):
 		html = "<html><head>"
 		html += "<title>Email statistics for %s</title>" % self.ACCOUNT
@@ -328,6 +377,7 @@ class Charts(base.Charts):
 	def create(self):		
 		self.charts = []
 		self.chart_date_time()
+		self.chart_responsetime()
 		self.chart_filesize()
 		self.chart_mailsperday()
 		return self.create_simple_html()
