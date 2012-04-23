@@ -45,7 +45,6 @@ class Generator(lml.base.Generator):
 		USER = "rami95"
 		FILE = "data/%s.lastfm.sqlite.db" % USER
 		FILEPREFIX = "charts/%s.lastfm.chart." % USER
-		HTMLFILE = "charts/music.lastfm.%s.html" % USER
 		APIK = "b8258575158335e66482df0777e5b331"
 		OFFSET = time.mktime(datetime.datetime(2010,01,01).timetuple())
 		if download:
@@ -53,6 +52,30 @@ class Generator(lml.base.Generator):
 		chart = lml.music.Charts(FILE, FILEPREFIX, USER).create()
 		self.charts.append((chart, "Music (Last.fm): rami95"))
 		print "Music done."
+		
+	def ping(self, download = True):
+		print "Ping"
+		import lml.ping
+		KEYHASH = "0e0f17629059a77b7d4b0a6d95845e5b7a1c4490" # SHA1 hash of my "ping" key
+		SERVER = "http://www.raphaelmichel.de/stats/pingserver/data/"
+		
+		DEVICE = "PC"
+		FILE = "data/%s.ping.raw.txt" % DEVICE
+		FILEPREFIX = "charts/%s.ping.chart." % DEVICE
+		if download:
+			lml.ping.Download(FILE, KEYHASH, DEVICE).download()
+		chart = lml.ping.Charts(FILE, FILEPREFIX, DEVICE).create()
+		self.charts.append((chart, "Online time: desktop computer"))
+		
+		DEVICE = "android"
+		FILE = "data/%s.ping.raw.txt" % DEVICE
+		FILEPREFIX = "charts/%s.ping.chart." % DEVICE
+		if download:
+			lml.ping.Download(FILE, KEYHASH, DEVICE).download()
+		chart = lml.ping.Charts(FILE, FILEPREFIX, DEVICE).create()
+		self.charts.append((chart, "Online time: smartphone"))
+		
+		print "Ping done."
 		
 def main():
 	parser = OptionParser()
@@ -65,6 +88,9 @@ def main():
 	parser.add_option("-l", "--no-music",
 					  action="store_false", dest="lastfm", default=True,
 					  help="Don't scan last.fm")
+	parser.add_option("-p", "--no-ping",
+					  action="store_false", dest="ping", default=True,
+					  help="Don't scan ping data")
 	parser.add_option("-d", "--no-downloads",
 					  action="store_false", dest="dl", default=True,
 					  help="Don't use data we not already have")
@@ -78,6 +104,8 @@ def main():
 		g.twitter(options.dl)
 	if options.lastfm:
 		g.lastfm(options.dl)
+	if options.ping:
+		g.ping(options.dl)
 
 	g.create_simple_html_index("charts/index.html")
 
