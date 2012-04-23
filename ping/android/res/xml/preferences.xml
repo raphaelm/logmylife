@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <CheckBoxPreference android:summaryOff="Service is stopped" android:summaryOn="Service is running" android:key="service_active" android:title="Status"/>
+    <EditTextPreference android:title="Ping URL" android:defaultValue="http://www.raphaelmichel.de/stats/pingserver/recieve.php" android:key="ping_url" android:summary="The server you want to ping to. I provide one, if you don't have one."/>
+    <EditTextPreference android:title="Your key" android:key="ping_key" android:summary="Select something unique for your person. Who knows this value is able to fake your statistics!"/>
+    <EditTextPreference android:title="Device label" android:key="ping_device" android:summary='Name this device, e.g. "android"'/>
+    <Preference android:title="Last ping" android:summary="Never" android:key="last_ping"/>
+    
+
+</PreferenceScreen>
