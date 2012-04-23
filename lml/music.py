@@ -259,5 +259,5 @@ class Charts(base.Charts):
 			self.c = self.conn.cursor()
 		else:
 			print "Database not found!"
-			sys.exit()
+			exit()
 		self.conn.text_factory = str
