@@ -8,7 +8,9 @@ Currently supported:
 * E-Mails in maildir format[2]
 * Twitter (only the last 3,200 tweets can be downloaded, I'm sorry)
 * Music scrobbled to Last.fm
-
+* I'm working on a thing I name 'ping' which is an app on my smartphone
+  and a cronjob on my desktop computer and pings a URL every 10 to 15
+  minutes to count how often I' am (or, my devices are) online. 
 
 [1] http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life/
 [2] It's actually my GMail account which is downloaded with getmail anyway
