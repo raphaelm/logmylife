@@ -1,0 +1,7 @@
+With "ping" you can monitor how often your devices are on and offline.
+Just set up a cronjob on your Unix or download the App to your android
+phone accessing a web page every ten to fifteen minutes. You can set up
+your own server or you can use mine.
+
+You'll have to choose a key - choose something identifying you and absolutely
+unique. Whoever knows your key or has the same one, can manipulate your statistics.
