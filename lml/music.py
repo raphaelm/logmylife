@@ -197,6 +197,7 @@ class Charts(base.Charts):
 		ax.set_xlabel("times played")
 		plt.savefig(self.FILEPREFIX+"toptracks."+label+".png")
 		self.charts.append(self.FILEPREFIX+"toptracks."+label+".png")
+		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_toptracks(self):
 		self.chart_toptracks_range(0, "total")
@@ -221,6 +222,7 @@ class Charts(base.Charts):
 		ax.set_xlabel("tracks played")
 		plt.savefig(self.FILEPREFIX+"topartists."+label+".png")
 		self.charts.append(self.FILEPREFIX+"topartists."+label+".png")
+		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_topartists(self):
 		self.chart_topartists_range(0, "total")
