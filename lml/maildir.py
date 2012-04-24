@@ -20,7 +20,7 @@ class Scan(base.Scan):
 	def parsemail(self, f):
 		fp = open(f)
 		p = email.parser.Parser()
-		r = p.parse(fp)
+		r = p.parse(fp, True)
 		fp.close()
 		d = email.utils.parsedate(r.get("Date"))
 		msgid = r.get("Message-ID")
