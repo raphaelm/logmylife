@@ -50,7 +50,7 @@ class Download(base.Download):
 				break
 			else:
 				for tweet in tree:
-					timestamp = time.mktime(email.utils.parsedate(tweet['created_at']))
+					timestamp = time.mktime(email.utils.parsedate(tweet['created_at'])) # guesses best
 					c.execute("INSERT INTO tweets (id, text, timestamp) VALUES (?,?,?)",
 						(tweet['id'], tweet['text'], timestamp))
 				maxid = tweet['id']
@@ -69,9 +69,9 @@ class Charts(base.Charts):
 		
 		self.c.execute('SELECT timestamp FROM tweets')
 		for row in self.c:
-			ts = row[0]
-			x = date.fromtimestamp(ts)
-			y = (ts % (3600*24))/3600
+			t = time.localtime(float(row[0]))
+			x = date.fromtimestamp(time.mktime(t))
+			y = t.tm_hour + (t.tm_min/60.0)
 			x_total.append(x)
 			y_total.append(y)
 			
@@ -116,8 +116,8 @@ class Charts(base.Charts):
 		
 		self.c.execute('SELECT timestamp FROM tweets WHERE timestamp > 0')
 		for row in self.c:
-			ts = row[0]
-			d = date.fromtimestamp(ts).isoformat()
+			t = time.localtime(float(row[0]))
+			d = date.fromtimestamp(time.mktime(t)).isoformat()
 			if d in day:
 				day[d] += 1
 			else:

@@ -80,9 +80,9 @@ class Charts(base.Charts):
 		
 		self.c.execute('SELECT msg_time, msg_from, msg_to, msgid FROM mails WHERE msg_time > 0')
 		for row in self.c:
-			ts = row[0]
-			x = date.fromtimestamp(ts)
-			y = (ts % (3600*24))/3600
+			t = time.localtime(float(row[0]))
+			x = date.fromtimestamp(time.mktime(t))
+			y = t.tm_hour + (t.tm_min/60.0)
 			if mere.match(row[1]) is None or mere.match(row[2]) is not None:
 				# Mails to myself shouldn't be counted, they are either spam
 				# or "irrelevant" for my communication profile
@@ -229,8 +229,8 @@ class Charts(base.Charts):
 		
 		self.c.execute('SELECT msg_time, msg_from, msg_to, msgid FROM mails WHERE msg_time > 0')
 		for row in self.c:
-			ts = row[0]
-			x = date.fromtimestamp(ts)
+			t = time.localtime(float(row[0]))
+			x = date.fromtimestamp(time.mktime(t))
 			d = x.isoformat()
 			if mere.match(row[1]) is None or mere.match(row[2]) is not None:
 				# Mails to myself shouldn't be counted, they are either spam

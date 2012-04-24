@@ -11,13 +11,14 @@ import base
 from utils import daterange
 
 class Download(base.Download):
-	def __init__(self, FILE, HASH, DEVICE):
+	def __init__(self, FILE, SERVER, HASH, DEVICE):
 		self.FILE = FILE
+		self.SERVER = SERVER
 		self.HASH = HASH
 		self.DEVICE = DEVICE
 		
 	def download(self):
-		f = urllib.urlopen("http://www.raphaelmichel.de/stats/pingserver/data/pings.%s.%s.txt" % (self.HASH, self.DEVICE))
+		f = urllib.urlopen("%sdata/pings.%s.%s.txt" % (self.SERVER, self.HASH, self.DEVICE))
 		f2 = open(self.FILE, 'w')
 		f2.write(f.read())
 		f.close()
@@ -31,12 +32,12 @@ class Charts(base.Charts):
 		
 		f = open(self.FILE)
 		for row in f:
-			ts = int(row.strip()) - time.timezone
-			x = date.fromtimestamp(ts)
-			y = (ts % (3600*24))/3600
+			t = time.localtime(float(row.strip()))
+			x = date.fromtimestamp(time.mktime(t))
+			y = t.tm_hour + (t.tm_min/60.0)
 			x_total.append(x)
 			y_total.append(y)
-			
+		
 		# Pings Scatter
 		plt.clf()
 		ax = plt.subplot(111)
@@ -54,7 +55,7 @@ class Charts(base.Charts):
 		ax.set_ylabel("time of day")
 		plt.savefig(self.FILEPREFIX+"times.png")
 		self.charts.append(self.FILEPREFIX+"times.png")
-			
+						
 		# Pings Histogram
 		plt.clf()
 		ax = plt.subplot(111)
