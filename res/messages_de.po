@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LogMyLife\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-24 17:04+0200\n"
-"PO-Revision-Date: 2012-04-24 17:04+0100\n"
+"POT-Creation-Date: 2012-04-24 17:15+0200\n"
+"PO-Revision-Date: 2012-04-24 17:15+0100\n"
 "Last-Translator: Raphael <raphael@geeksfactory.de>\n"
 "Language-Team: Raphael Michel <webmaster@raphaelmichel.de>\n"
 "Language: \n"
@@ -104,13 +104,17 @@ msgstr "Uhrzeit"
 
 #: lml/maildir.py:124
 #: lml/maildir.py:211
+#: lml/maildir.py:283
 #: lml/maildir.py:298
+#: lml/maildir.py:313
 msgid "outgoing"
 msgstr "Gesendet"
 
 #: lml/maildir.py:124
 #: lml/maildir.py:211
+#: lml/maildir.py:284
 #: lml/maildir.py:299
+#: lml/maildir.py:313
 msgid "incoming"
 msgstr "Empfangen"
 
@@ -125,7 +129,6 @@ msgstr "E-Mails: Verteilung auf den Tag (insgesamt)"
 #: lml/maildir.py:286
 #: lml/maildir.py:301
 #: lml/maildir.py:315
-#: lml/maildir.py:363
 #: lml/music.py:154
 #: lml/music.py:167
 #: lml/music.py:180
@@ -192,6 +195,10 @@ msgstr "Wann andere antworten"
 #: lml/maildir.py:362
 msgid "Time before first response"
 msgstr "Verstrichene Zeit bis zur ersten Antwort auf E-Mails"
+
+#: lml/maildir.py:363
+msgid "percentage"
+msgstr "Anteil (%)"
 
 #: lml/maildir.py:371
 #: lml/maildir.py:372

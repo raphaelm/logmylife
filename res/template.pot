@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-24 17:04+0200\n"
+"POT-Creation-Date: 2012-04-24 17:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -86,11 +86,13 @@ msgstr ""
 msgid "time of day"
 msgstr ""
 
-#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:298
+#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:283 lml/maildir.py:298
+#: lml/maildir.py:313
 msgid "outgoing"
 msgstr ""
 
-#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:299
+#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:284 lml/maildir.py:299
+#: lml/maildir.py:313
 msgid "incoming"
 msgstr ""
 
@@ -99,10 +101,10 @@ msgid "Mail distribution (total)"
 msgstr ""
 
 #: lml/maildir.py:130 lml/maildir.py:158 lml/maildir.py:186 lml/maildir.py:214
-#: lml/maildir.py:286 lml/maildir.py:301 lml/maildir.py:315 lml/maildir.py:363
-#: lml/music.py:154 lml/music.py:167 lml/music.py:180 lml/ping.py:74
-#: lml/ping.py:87 lml/ping.py:100 lml/twitter.py:105 lml/twitter.py:151
-#: lml/twitter.py:164 lml/twitter.py:177
+#: lml/maildir.py:286 lml/maildir.py:301 lml/maildir.py:315 lml/music.py:154
+#: lml/music.py:167 lml/music.py:180 lml/ping.py:74 lml/ping.py:87
+#: lml/ping.py:100 lml/twitter.py:105 lml/twitter.py:151 lml/twitter.py:164
+#: lml/twitter.py:177
 msgid "count"
 msgstr ""
 
@@ -156,6 +158,10 @@ msgstr ""
 
 #: lml/maildir.py:362
 msgid "Time before first response"
+msgstr ""
+
+#: lml/maildir.py:363
+msgid "percentage"
 msgstr ""
 
 #: lml/maildir.py:371 lml/maildir.py:372

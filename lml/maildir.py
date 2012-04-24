@@ -338,21 +338,21 @@ class Charts(base.Charts):
 			
 		lx = float(len(x_in))
 		r_in = (
-			len([x for x in x_in if x < 60*5])/lx,
-			len([x for x in x_in if x < 60*15 and x >= 60*5])/lx,
-			len([x for x in x_in if x < 3600 and x >= 60*15])/lx,
-			len([x for x in x_in if x < 3600*4 and x >= 3600])/lx,
-			len([x for x in x_in if x < 3600*25 and x >= 3600*4])/lx,
-			len([x for x in x_in if x >= 3600*25])/lx
+			len([x for x in x_in if x < 60*5])/lx*100,
+			len([x for x in x_in if x < 60*15 and x >= 60*5])/lx*100,
+			len([x for x in x_in if x < 3600 and x >= 60*15])/lx*100,
+			len([x for x in x_in if x < 3600*4 and x >= 3600])/lx*100,
+			len([x for x in x_in if x < 3600*25 and x >= 3600*4])/lx*100,
+			len([x for x in x_in if x >= 3600*25])/lx*100
 		)
 		lx = float(len(x_out))
 		r_out = (
-			len([x for x in x_out if x < 60*5])/lx,
-			len([x for x in x_out if x < 60*15 and x >= 60*5])/lx,
-			len([x for x in x_out if x < 3600 and x >= 60*15])/lx,
-			len([x for x in x_out if x < 3600*4 and x >= 3600])/lx,
-			len([x for x in x_out if x < 3600*25 and x >= 3600*4])/lx,
-			len([x for x in x_out if x >= 3600*25])/lx
+			len([x for x in x_out if x < 60*5])/lx*100,
+			len([x for x in x_out if x < 60*15 and x >= 60*5])/lx*100,
+			len([x for x in x_out if x < 3600 and x >= 60*15])/lx*100,
+			len([x for x in x_out if x < 3600*4 and x >= 3600])/lx*100,
+			len([x for x in x_out if x < 3600*25 and x >= 3600*4])/lx*100,
+			len([x for x in x_out if x >= 3600*25])/lx*100
 		)
 			
 		plt.clf()
@@ -360,7 +360,7 @@ class Charts(base.Charts):
 		plt.bar(ind, r_out, width, color='b', label=_('When I answer'))
 		plt.bar(ind+width, r_in, width, color='g', label=_('When other people answer'))
 		plt.title(_("Time before first response"))
-		plt.ylabel(_("count"))
+		plt.ylabel(_("percentage"))
 		plt.xticks(ind+width, ('< 5min', '< 15min', '< 1hr', '< 4hrs', '< 1day', 'more'))
 		plt.legend(loc=0)
 		plt.savefig(self.FILEPREFIX+"responsetime.hist.png")
