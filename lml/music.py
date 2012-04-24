@@ -195,17 +195,17 @@ class Charts(base.Charts):
 		plt.yticks(range(0,n), artists)
 		plt.autoscale()
 		plt.subplots_adjust(left=0.25, right=0.9)
-		plt.title(_("Top tracks (")+label+")")
+		plt.title(_("Top tracks (")+_(label)+")")
 		ax.set_xlabel(_("times played"))
 		plt.savefig(self.FILEPREFIX+"toptracks."+label+".png")
 		self.charts.append(self.FILEPREFIX+"toptracks."+label+".png")
 		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_toptracks(self):
-		self.chart_toptracks_range(0, _("total"))
-		self.chart_toptracks_range(time.time()-3600*24*7, _("last week"))
-		self.chart_toptracks_range(time.time()-3600*24*31, _("last month"))
-		self.chart_toptracks_range(time.time()-3600*24*365, _("last year"))
+		self.chart_toptracks_range(0, "total")
+		self.chart_toptracks_range(time.time()-3600*24*7, "last week")
+		self.chart_toptracks_range(time.time()-3600*24*31, "last month")
+		self.chart_toptracks_range(time.time()-3600*24*365, "last year")
 		
 	def chart_topartists_range(self, start = 0, label = "total", n = 20):
 		artists = []
@@ -220,17 +220,17 @@ class Charts(base.Charts):
 		plt.yticks(range(0,n), artists)
 		plt.autoscale()
 		plt.subplots_adjust(left=0.25, right=0.9)
-		plt.title(_("Top artists (")+label+")")
+		plt.title(_("Top artists (")+_(label)+")")
 		ax.set_xlabel(_("tracks played"))
 		plt.savefig(self.FILEPREFIX+"topartists."+label+".png")
 		self.charts.append(self.FILEPREFIX+"topartists."+label+".png")
 		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_topartists(self):
-		self.chart_topartists_range(0, _("total"))
-		self.chart_topartists_range(time.time()-3600*24*7, _("last week"))
-		self.chart_topartists_range(time.time()-3600*24*31, _("last month"))
-		self.chart_topartists_range(time.time()-3600*24*365, _("last year"))
+		self.chart_topartists_range(0, "total")
+		self.chart_topartists_range(time.time()-3600*24*7, "last week")
+		self.chart_topartists_range(time.time()-3600*24*31, "last month")
+		self.chart_topartists_range(time.time()-3600*24*365, "last year")
 		
 	def create_simple_html(self):
 		html = "<html><head>"
