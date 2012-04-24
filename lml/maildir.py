@@ -5,6 +5,7 @@ import email.parser
 import email.utils
 import time
 import sys
+import codecs
 from datetime import date, datetime, timedelta
 
 import matplotlib.cm as cm
@@ -17,7 +18,7 @@ from utils import daterange
 import base
 
 class Scan(base.Scan):
-	def parsemail(self, f):
+	def parsemail(self, f):			
 		fp = open(f)
 		p = email.parser.Parser()
 		r = p.parse(fp, True)
@@ -25,7 +26,7 @@ class Scan(base.Scan):
 		d = email.utils.parsedate(r.get("Date"))
 		msgid = r.get("Message-ID")
 		if d is not None and r.get("X-Autoreply") != "yes":
-			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto, filesize) VALUES (?,?,?,?,?,?,?)",
+			self.c.execute("INSERT INTO mails (msgid, msg_to, msg_from, contenttype, msg_time, replyto, filesize, filename) VALUES (?,?,?,?,?,?,?,?)",
 				(
 					msgid,
 					email.utils.parseaddr(r.get("To"))[1],
@@ -33,10 +34,11 @@ class Scan(base.Scan):
 					r.get("Content-Type", ""),
 					time.mktime(d),
 					r.get("In-Reply-To", ""),
-					os.path.getsize(f)
+					os.path.getsize(f),
+					f
 				))
 			if self.i % 10 == 0:
-				sys.stdout.write("\r%05d mails scanned" % self.i)
+				sys.stdout.write("\r"+(_("%05d mails scanned") % self.i))
 				sys.stdout.flush()
 				self.conn.commit()
 			self.i += 1
@@ -48,7 +50,7 @@ class Scan(base.Scan):
 		for f in os.listdir(self.MDIR+'new'):
 			self.parsemail(self.MDIR+'new/'+f)
 		
-		print "\rScanned.                          "
+		print "\r"+_("Scanned.")+"                          "
 		self.conn.commit()
 		self.c.close()
 			
@@ -56,14 +58,14 @@ class Scan(base.Scan):
 	def __init__(self, MDIR, FILE):
 		self.MDIR = MDIR
 		self.i = 0
-		print "Scanning maildir",
+		print _("Scanning maildir"),
 		if os.path.exists(FILE):
 			self.conn = sqlite3.connect(FILE)
 			self.c = self.conn.cursor()
 		else:
 			self.conn = sqlite3.connect(FILE)
 			self.c = self.conn.cursor()
-			self.c.execute('''CREATE TABLE mails (msgid text unique on conflict ignore, msg_to text, msg_from text, contenttype text, msg_time real, replyto text, filesize real)''')
+			self.c.execute('''CREATE TABLE mails (msgid text unique on conflict ignore, msg_to text, msg_from text, contenttype text, msg_time real, replyto text, filesize real, filename text unique on conflict ignore)''')
 		self.conn.text_factory = str
 		
 class Charts(base.Charts):
@@ -100,17 +102,17 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		x_total = md.date2num(x_total)
-		plt.scatter(x_in, y_in, s=3, marker=(0,3,0), linewidths=0, c='g', label='Incoming')
-		plt.scatter(x_out, y_out, s=3, marker=(0,3,0), linewidths=0, c='b', label='Outgoing')
+		plt.scatter(x_in, y_in, s=3, marker=(0,3,0), linewidths=0, c='g', label=_('Incoming'))
+		plt.scatter(x_out, y_out, s=3, marker=(0,3,0), linewidths=0, c='b', label=_('Outgoing'))
 		plt.legend(loc=3)
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.axis([min(x_total), max(x_total), 0, 24])
-		plt.title("Mail (total)")
+		plt.title(_("Mail (total)"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times_total.png")
 		self.charts.append(self.FILEPREFIX+"times_total.png")
 			
@@ -119,12 +121,13 @@ class Charts(base.Charts):
 		ax = plt.subplot(111)
 		#plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
 		#plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
-		plt.hist([y_out, y_in], bins=range(0,25), color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked')
+		plt.hist([y_out, y_in], bins=range(0,25), color=['b', 'g'], label=[_('outgoing'), _('incoming')], histtype='barstacked')
 		plt.xlim(0,24)
 		plt.legend(loc=0)
-		plt.title("Mail distribution (total)")
+		plt.title(_("Mail distribution (total)"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("count"))
 		plt.savefig(self.FILEPREFIX+"times_total.hist.png")
 		self.charts.append(self.FILEPREFIX+"times_total.hist.png")
 			
@@ -136,22 +139,23 @@ class Charts(base.Charts):
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.axis([min(x_total), max(x_total), 0, 24])
-		plt.title("Mail (incoming)")
+		plt.title(_("Mail (incoming)"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times_in.png")
 		self.charts.append(self.FILEPREFIX+"times_in.png")
 			
 		# Incoming Histogram
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist(y_in, bins=range(0,25), color='g', label='Incoming')
+		plt.hist(y_in, bins=range(0,25), color='g', label=_('Incoming'))
 		plt.xlim(0,24)
-		plt.title("Mail distribution (incoming)")
+		plt.title(_("Mail distribution (incoming)"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("count"))
 		plt.savefig(self.FILEPREFIX+"times_in.hist.png")
 		self.charts.append(self.FILEPREFIX+"times_in.hist.png")
 			
@@ -163,22 +167,23 @@ class Charts(base.Charts):
 		labels = ax.get_xticklabels()
 		plt.setp(labels, rotation=30, fontsize=10)
 		plt.axis([min(x_total), max(x_total), 0, 24])
-		plt.title("Mail (outgoing)")
+		plt.title(_("Mail (outgoing)"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times_out.png")
 		self.charts.append(self.FILEPREFIX+"times_out.png")
 			
 		# Outgoing Histogram
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist(y_out, bins=range(0,25), color='b', label='Outgoing')
+		plt.hist(y_out, bins=range(0,25), color='b', label=_('Outgoing'))
 		plt.xlim(0,24)
-		plt.title("Mail distribution (outgoing)")
+		plt.title(_("Mail distribution (outgoing)"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("count"))
 		plt.savefig(self.FILEPREFIX+"times_out.hist.png")
 		self.charts.append(self.FILEPREFIX+"times_out.hist.png")
 
@@ -203,10 +208,10 @@ class Charts(base.Charts):
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist([x_out, x_in], bins=30, color=['b', 'g'], label=['outgoing', 'incoming'], log=True)
-		plt.title("Mail size (distribution)")
-		ax.set_xlabel("bytes")
-		ax.set_ylabel("count")
+		plt.hist([x_out, x_in], bins=30, color=['b', 'g'], label=[_('outgoing'), _('incoming')], log=True)
+		plt.title(_("Mail size (distribution)"))
+		ax.set_xlabel(_("bytes"))
+		ax.set_ylabel(_("count"))
 		plt.legend(loc=0)
 		plt.ylim(ymin=1)
 		plt.savefig(self.FILEPREFIX+"size.png")
@@ -275,10 +280,10 @@ class Charts(base.Charts):
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.plot(days, x_out, 'b', label='outgoing')
-		plt.plot(days, x_in, 'g', label='incoming')
-		plt.title("Mails per day")
-		ax.set_ylabel("count")
+		plt.plot(days, x_out, 'b', label=_('outgoing'))
+		plt.plot(days, x_in, 'g', label=_('incoming'))
+		plt.title(_("Mails per day"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(days), max(days), 0, max((max(x_in), max(x_out)))+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -290,10 +295,10 @@ class Charts(base.Charts):
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.plot(months, x_months_out, 'b', label='outgoing')
-		plt.plot(months, x_months_in, 'g', label='incoming')
-		plt.title("Mails per day (averaged by month)")
-		ax.set_ylabel("count")
+		plt.plot(months, x_months_out, 'b', label=_('outgoing'))
+		plt.plot(months, x_months_in, 'g', label=_('incoming'))
+		plt.title(_("Mails per day (averaged by month)"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(months), max(months), 0, max((max(x_months_in), max(x_months_out)))+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -305,10 +310,10 @@ class Charts(base.Charts):
 		
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=['outgoing', 'incoming'], histtype='barstacked', log=False)
-		plt.title("Mails per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
+		plt.hist([x_out, x_in], bins=100, color=['b', 'g'], label=[_('outgoing'), _('incoming')], histtype='barstacked', log=False)
+		plt.title(_("Mails per day (distribution)"))
+		ax.set_xlabel(_("count"))
+		ax.set_ylabel(_("days"))
 		plt.xlim(0, 50)
 		plt.legend(loc=0)
 		plt.savefig(self.FILEPREFIX+"perday.hist.png")
@@ -352,10 +357,10 @@ class Charts(base.Charts):
 			
 		plt.clf()
 		ax = plt.subplot(111)
-		plt.bar(ind, r_out, width, color='b', label='When I answer')
-		plt.bar(ind+width, r_in, width, color='g', label='When other people answer')
-		plt.title("Time before first response")
-		plt.ylabel("count")
+		plt.bar(ind, r_out, width, color='b', label=_('When I answer'))
+		plt.bar(ind+width, r_in, width, color='g', label=_('When other people answer'))
+		plt.title(_("Time before first response"))
+		plt.ylabel(_("count"))
 		plt.xticks(ind+width, ('< 5min', '< 15min', '< 1hr', '< 4hrs', '< 1day', 'more'))
 		plt.legend(loc=0)
 		plt.savefig(self.FILEPREFIX+"responsetime.hist.png")
@@ -363,13 +368,13 @@ class Charts(base.Charts):
 		
 	def create_simple_html(self):
 		html = "<html><head>"
-		html += "<title>Email statistics for %s</title>" % self.ACCOUNT
-		html += "</head><body><h1>Email statistics for %s</h1><a href='./'>Overview</a><br />" % self.ACCOUNT
+		html += ("<title>"+_("Email statistics for %s")+"</title>") % self.ACCOUNT
+		html += ("</head><body><h1>"+_("Email statistics for %s")+"</h1><a href='./'>"+_("Overview")+"</a><br />") % self.ACCOUNT
 		for c in self.charts:
 			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
-		html += "generated %s" % date.today().isoformat()
+		html += _("generated %s") % date.today().isoformat()
 		html += "</body></html>"
-		f = open(self.FILEPREFIX+"all.html", "w")
+		f = codecs.open(self.FILEPREFIX+"all.html", mode="w", encoding='utf-8')
 		f.write(html)
 		f.close()
 		return self.FILEPREFIX+"all.html"
@@ -392,6 +397,6 @@ class Charts(base.Charts):
 			self.conn = sqlite3.connect(FILE)
 			self.c = self.conn.cursor()
 		else:
-			print "Database not found!"
+			print _("Database not found!")
 			exit()
 		self.conn.text_factory = str

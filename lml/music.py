@@ -2,6 +2,7 @@ import time
 import os
 import sqlite3
 import urllib
+import codecs
 import xml.etree.ElementTree
 from datetime import date, datetime, timedelta
 
@@ -56,10 +57,10 @@ class DownloadLastFm(base.Download):
 						c.execute("INSERT INTO tracks (artist, name, album, timestamp) VALUES (?,?,?,?)",
 							(artist, name, album, timestamp))
 				conn.commit()
-				print("%d%% downloaded" % int((float(page)/float(totalPages))*100))
+				print(_("%d%% downloaded") % int((float(page)/float(totalPages))*100))
 					
 		else:
-			print("Nothing to do. Listen to more music!")
+			print(_("Nothing to do. Listen to more music!"))
 
 		c.close()
 		conn.close()
@@ -88,11 +89,11 @@ class Charts(base.Charts):
 		min_t = min(x_total)
 		max_t = max(x_total)
 		plt.axis([min_t, max_t, 0, 24])
-		plt.title("Listening to music")
+		plt.title(_("Listening to music"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times.png")
 		self.charts.append(self.FILEPREFIX+"times.png")
 			
@@ -101,9 +102,10 @@ class Charts(base.Charts):
 		ax = plt.subplot(111)
 		plt.hist(y_total, bins=range(0,25))
 		plt.xlim(0,24)
-		plt.title("Listening to music (distribution)")
+		plt.title(_("Listening to music (distribution)"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("number of tracks"))
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
 		self.charts.append(self.FILEPREFIX+"times.hist.png")
 		
@@ -148,8 +150,8 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.plot(days, x)
-		plt.title("Tracks played per day")
-		ax.set_ylabel("count")
+		plt.title(_("Tracks played per day"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(days), max(days), 0, max(x)+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -161,8 +163,8 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.plot(months, x_months)
-		plt.title("Tracks played per day (averaged by month)")
-		ax.set_ylabel("count")
+		plt.title(_("Tracks played per day (averaged by month)"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(months), max(months), 0, max(x_months)+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -174,9 +176,9 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.hist(x, bins=30, color='b')
-		plt.title("Tracks played per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
+		plt.title(_("Tracks played per day (distribution)"))
+		ax.set_xlabel(_("count"))
+		ax.set_ylabel(_("days"))
 		plt.savefig(self.FILEPREFIX+"perday.hist.png")
 		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
@@ -193,17 +195,17 @@ class Charts(base.Charts):
 		plt.yticks(range(0,n), artists)
 		plt.autoscale()
 		plt.subplots_adjust(left=0.25, right=0.9)
-		plt.title("Top tracks ("+label+")")
-		ax.set_xlabel("times played")
+		plt.title(_("Top tracks (")+label+")")
+		ax.set_xlabel(_("times played"))
 		plt.savefig(self.FILEPREFIX+"toptracks."+label+".png")
 		self.charts.append(self.FILEPREFIX+"toptracks."+label+".png")
 		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_toptracks(self):
-		self.chart_toptracks_range(0, "total")
-		self.chart_toptracks_range(time.time()-3600*24*7, "last week")
-		self.chart_toptracks_range(time.time()-3600*24*31, "last month")
-		self.chart_toptracks_range(time.time()-3600*24*365, "last year")
+		self.chart_toptracks_range(0, _("total"))
+		self.chart_toptracks_range(time.time()-3600*24*7, _("last week"))
+		self.chart_toptracks_range(time.time()-3600*24*31, _("last month"))
+		self.chart_toptracks_range(time.time()-3600*24*365, _("last year"))
 		
 	def chart_topartists_range(self, start = 0, label = "total", n = 20):
 		artists = []
@@ -218,27 +220,27 @@ class Charts(base.Charts):
 		plt.yticks(range(0,n), artists)
 		plt.autoscale()
 		plt.subplots_adjust(left=0.25, right=0.9)
-		plt.title("Top artists ("+label+")")
-		ax.set_xlabel("tracks played")
+		plt.title(_("Top artists (")+label+")")
+		ax.set_xlabel(_("tracks played"))
 		plt.savefig(self.FILEPREFIX+"topartists."+label+".png")
 		self.charts.append(self.FILEPREFIX+"topartists."+label+".png")
 		plt.subplots_adjust(left=0.125, right=0.9)
 		
 	def charts_topartists(self):
-		self.chart_topartists_range(0, "total")
-		self.chart_topartists_range(time.time()-3600*24*7, "last week")
-		self.chart_topartists_range(time.time()-3600*24*31, "last month")
-		self.chart_topartists_range(time.time()-3600*24*365, "last year")
+		self.chart_topartists_range(0, _("total"))
+		self.chart_topartists_range(time.time()-3600*24*7, _("last week"))
+		self.chart_topartists_range(time.time()-3600*24*31, _("last month"))
+		self.chart_topartists_range(time.time()-3600*24*365, _("last year"))
 		
 	def create_simple_html(self):
 		html = "<html><head>"
-		html += "<title>Last.fm statistics for %s</title>" % self.USER
-		html += "</head><body><h1>Last.fm statistics for %s</h1><a href='./'>Overview</a><br />" % self.USER
+		html += ("<title>"+_("Last.fm statistics for %s")+"</title>") % self.USER
+		html += ("</head><body><h1>"+_("Last.fm statistics for %s")+"</h1><a href='./'>"+_("Overview")+"</a><br />") % self.USER
 		for c in self.charts:
 			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
-		html += "generated %s" % date.today().isoformat()
+		html += _("generated %s") % date.today().isoformat()
 		html += "</body></html>"
-		f = open(self.FILEPREFIX+"all.html", "w")
+		f = codecs.open(self.FILEPREFIX+"all.html", mode="w", encoding='utf-8')
 		f.write(html)
 		f.close()
 		return self.FILEPREFIX+"all.html"
@@ -260,6 +262,6 @@ class Charts(base.Charts):
 			self.conn = sqlite3.connect(FILE)
 			self.c = self.conn.cursor()
 		else:
-			print "Database not found!"
+			print _("Database not found!")
 			exit()
 		self.conn.text_factory = str

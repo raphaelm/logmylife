@@ -1,6 +1,7 @@
 import time
 import os
 import urllib
+import codecs
 from datetime import date, datetime, timedelta
 
 import matplotlib.cm as cm
@@ -29,12 +30,18 @@ class Charts(base.Charts):
 	def chart_date_time(self):
 		x_total = []
 		y_total = []
+		y_week = []
+		y_weekend = []
 		
 		f = open(self.FILE)
 		for row in f:
 			t = time.localtime(float(row.strip()))
 			x = date.fromtimestamp(time.mktime(t))
 			y = t.tm_hour + (t.tm_min/60.0)
+			if t.tm_wday > 4:
+				y_weekend.append(y)
+			else:
+				y_week.append(y)
 			x_total.append(x)
 			y_total.append(y)
 		
@@ -48,11 +55,11 @@ class Charts(base.Charts):
 		min_t = min(x_total)
 		max_t = max(x_total)
 		plt.axis([min_t, max_t, 0, 24])
-		plt.title("Pings")
+		plt.title(_("Pings"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times.png")
 		self.charts.append(self.FILEPREFIX+"times.png")
 						
@@ -61,21 +68,48 @@ class Charts(base.Charts):
 		ax = plt.subplot(111)
 		plt.hist(y_total, bins=range(0,25))
 		plt.xlim(0,24)
-		plt.title("Pings distribution")
+		plt.title(_("Pings distribution"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("count"))
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
 		self.charts.append(self.FILEPREFIX+"times.hist.png")
 		
+		if len(y_week) > 0:
+			# Pings Histogram, weekdays
+			plt.clf()
+			ax = plt.subplot(111)
+			plt.hist(y_week, bins=range(0,25))
+			plt.xlim(0,24)
+			plt.title(_("Pings distribution on weekdays"))
+			plt.xticks(range(0, 25))
+			ax.set_xlabel(_("time of day"))
+			ax.set_ylabel(_("count"))
+			plt.savefig(self.FILEPREFIX+"times.hist.week.png")
+			self.charts.append(self.FILEPREFIX+"times.hist.week.png")
+					
+		if len(y_weekend) > 0:	
+			# Pings Histogram, weekends
+			plt.clf()
+			ax = plt.subplot(111)
+			plt.hist(y_weekend, bins=range(0,25))
+			plt.xlim(0,24)
+			plt.title(_("Pings distribution at the weekends"))
+			plt.xticks(range(0, 25))
+			ax.set_xlabel(_("time of day"))
+			ax.set_ylabel(_("count"))
+			plt.savefig(self.FILEPREFIX+"times.hist.we.png")
+			self.charts.append(self.FILEPREFIX+"times.hist.we.png")
+		
 	def create_simple_html(self):
 		html = "<html><head>"
-		html += "<title>Online statistics for %s</title>" % self.DEVICE
-		html += "</head><body><h1>Online statistics for %s</h1><a href='./'>Overview</a><br />" % self.DEVICE
+		html += ("<title>"+_("Online statistics for %s")+"</title>") % self.DEVICE
+		html += ("</head><body><h1>"+_("Online statistics for %s")+"</h1><a href='./'>"+_("Overview")+"</a><br />") % self.DEVICE
 		for c in self.charts:
 			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
-		html += "generated %s" % date.today().isoformat()
+		html += _("generated %s") % date.today().isoformat()
 		html += "</body></html>"
-		f = open(self.FILEPREFIX+"all.html", "w")
+		f = codecs.open(self.FILEPREFIX+"all.html", mode="w", encoding='utf-8')
 		f.write(html)
 		f.close()
 		return self.FILEPREFIX+"all.html"
@@ -91,5 +125,5 @@ class Charts(base.Charts):
 		self.DEVICE = DEVICE
 		
 		if not os.path.exists(FILE):
-			print "Data not found!"
+			print _("Data not found!")
 			exit()

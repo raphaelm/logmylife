@@ -4,6 +4,7 @@ import urllib
 import json
 import email.utils
 import time
+import codecs
 from datetime import date, datetime, timedelta, tzinfo
 
 import matplotlib.cm as cm
@@ -55,7 +56,7 @@ class Download(base.Download):
 						(tweet['id'], tweet['text'], timestamp))
 				maxid = tweet['id']
 			conn.commit()
-			print("%d pages downloaded" % page)
+			print(_("%d pages downloaded") % page)
 
 		c.close()
 		conn.close()
@@ -85,11 +86,11 @@ class Charts(base.Charts):
 		min_t = min(x_total)
 		max_t = max(x_total)
 		plt.axis([min_t, max_t, 0, 24])
-		plt.title("Tweets")
+		plt.title(_("Tweets"))
 		ax.xaxis_date()
 		plt.yticks(range(0, 25))
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
-		ax.set_ylabel("time of day")
+		ax.set_ylabel(_("time of day"))
 		plt.savefig(self.FILEPREFIX+"times.png")
 		self.charts.append(self.FILEPREFIX+"times.png")
 			
@@ -98,9 +99,10 @@ class Charts(base.Charts):
 		ax = plt.subplot(111)
 		plt.hist(y_total, bins=range(0,25))
 		plt.xlim(0,24)
-		plt.title("Tweets distribution")
+		plt.title(_("Tweets distribution"))
 		plt.xticks(range(0, 25))
-		ax.set_xlabel("time of day")
+		ax.set_xlabel(_("time of day"))
+		ax.set_ylabel(_("count"))
 		plt.savefig(self.FILEPREFIX+"times.hist.png")
 		self.charts.append(self.FILEPREFIX+"times.hist.png")
 		
@@ -145,8 +147,8 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.plot(days, x)
-		plt.title("Tweets per day")
-		ax.set_ylabel("count")
+		plt.title(_("Tweets per day"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(days), max(days), 0, max(x)+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -158,8 +160,8 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.plot(months, x_months)
-		plt.title("Tweets per day (averaged by month)")
-		ax.set_ylabel("count")
+		plt.title(_("Tweets per day (averaged by month)"))
+		ax.set_ylabel(_("count"))
 		ax.xaxis_date()
 		plt.axis([min(months), max(months), 0, max(x_months)+5])
 		ax.xaxis.set_major_formatter( md.DateFormatter('%m/%Y') )
@@ -171,9 +173,9 @@ class Charts(base.Charts):
 		plt.clf()
 		ax = plt.subplot(111)
 		plt.hist(x, bins=30, color='b')
-		plt.title("Tweets per day (distribution)")
-		ax.set_xlabel("count")
-		ax.set_ylabel("days")
+		plt.title(_("Tweets per day (distribution)"))
+		ax.set_xlabel(_("count"))
+		ax.set_ylabel(_("days"))
 		plt.savefig(self.FILEPREFIX+"perday.hist.png")
 		self.charts.append(self.FILEPREFIX+"perday.hist.png")
 		
@@ -186,20 +188,20 @@ class Charts(base.Charts):
 		plt.clf()
 		plt.figure(figsize=(7,7))
 		ax = plt.subplot(111)
-		plt.pie((cnt_link, cnt-cnt_link), labels=('Tweets with a link', 'Tweets without a link'), autopct='%1.1f%%', shadow=True)
-		plt.title("Links in tweets")
+		plt.pie((cnt_link, cnt-cnt_link), labels=(_('Tweets with a link'), _('Tweets without a link')), autopct='%1.1f%%', shadow=True)
+		plt.title(_("Links in tweets"))
 		plt.savefig(self.FILEPREFIX+"links.png")
 		self.charts.append(self.FILEPREFIX+"links.png")
 		
 	def create_simple_html(self):
 		html = "<html><head>"
-		html += "<title>Twitter statistics for %s</title>" % self.USER
-		html += "</head><body><h1>Twitter statistics for %s</h1><a href='./'>Overview</a><br />" % self.USER
+		html += ("<title>"+_("Twitter statistics for %s")+"</title>") % self.USER
+		html += ("</head><body><h1>"+_("Twitter statistics for %s")+"</h1><a href='./'>"+_("Overview")+"</a><br />") % self.USER
 		for c in self.charts:
 			html += "<img src='%s' /><br />" % os.path.join((os.path.relpath(os.path.dirname(c), os.path.dirname(self.FILEPREFIX))), os.path.basename(c))
-		html += "generated %s" % date.today().isoformat()
+		html += _("generated %s") % date.today().isoformat()
 		html += "</body></html>"
-		f = open(self.FILEPREFIX+"all.html", "w")
+		f = codecs.open(self.FILEPREFIX+"all.html", mode="w", encoding='utf-8')
 		f.write(html)
 		f.close()
 		return self.FILEPREFIX+"all.html"

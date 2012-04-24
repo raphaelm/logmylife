@@ -1,0 +1,309 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-04-24 17:04+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: generate.py:28
+#, python-format
+msgid "Twitter: %s"
+msgstr ""
+
+#: generate.py:46
+#, python-format
+msgid "Email: %s"
+msgstr ""
+
+#: generate.py:64
+#, python-format
+msgid "Music (Last.fm): %s"
+msgstr ""
+
+#: generate.py:83
+msgid "Online time: desktop computer"
+msgstr ""
+
+#: generate.py:95
+msgid "Online time: smartphone"
+msgstr ""
+
+#: lml/base.py:27
+msgid "Statistics :: Logged life"
+msgstr ""
+
+#: lml/base.py:28
+msgid "Statistics"
+msgstr ""
+
+#: lml/base.py:34 lml/maildir.py:375 lml/music.py:241 lml/ping.py:110
+#: lml/twitter.py:202
+#, python-format
+msgid "generated %s"
+msgstr ""
+
+#: lml/maildir.py:41
+#, python-format
+msgid "%05d mails scanned"
+msgstr ""
+
+#: lml/maildir.py:53
+msgid "Scanned."
+msgstr ""
+
+#: lml/maildir.py:61
+msgid "Scanning maildir"
+msgstr ""
+
+#: lml/maildir.py:105 lml/maildir.py:153
+msgid "Incoming"
+msgstr ""
+
+#: lml/maildir.py:106 lml/maildir.py:181
+msgid "Outgoing"
+msgstr ""
+
+#: lml/maildir.py:111
+msgid "Mail (total)"
+msgstr ""
+
+#: lml/maildir.py:115 lml/maildir.py:129 lml/maildir.py:146 lml/maildir.py:157
+#: lml/maildir.py:174 lml/maildir.py:185 lml/music.py:96 lml/music.py:107
+#: lml/ping.py:62 lml/ping.py:73 lml/ping.py:86 lml/ping.py:99
+#: lml/twitter.py:93 lml/twitter.py:104
+msgid "time of day"
+msgstr ""
+
+#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:298
+msgid "outgoing"
+msgstr ""
+
+#: lml/maildir.py:124 lml/maildir.py:211 lml/maildir.py:299
+msgid "incoming"
+msgstr ""
+
+#: lml/maildir.py:127
+msgid "Mail distribution (total)"
+msgstr ""
+
+#: lml/maildir.py:130 lml/maildir.py:158 lml/maildir.py:186 lml/maildir.py:214
+#: lml/maildir.py:286 lml/maildir.py:301 lml/maildir.py:315 lml/maildir.py:363
+#: lml/music.py:154 lml/music.py:167 lml/music.py:180 lml/ping.py:74
+#: lml/ping.py:87 lml/ping.py:100 lml/twitter.py:105 lml/twitter.py:151
+#: lml/twitter.py:164 lml/twitter.py:177
+msgid "count"
+msgstr ""
+
+#: lml/maildir.py:142
+msgid "Mail (incoming)"
+msgstr ""
+
+#: lml/maildir.py:155
+msgid "Mail distribution (incoming)"
+msgstr ""
+
+#: lml/maildir.py:170
+msgid "Mail (outgoing)"
+msgstr ""
+
+#: lml/maildir.py:183
+msgid "Mail distribution (outgoing)"
+msgstr ""
+
+#: lml/maildir.py:212
+msgid "Mail size (distribution)"
+msgstr ""
+
+#: lml/maildir.py:213
+msgid "bytes"
+msgstr ""
+
+#: lml/maildir.py:285
+msgid "Mails per day"
+msgstr ""
+
+#: lml/maildir.py:300
+msgid "Mails per day (averaged by month)"
+msgstr ""
+
+#: lml/maildir.py:314
+msgid "Mails per day (distribution)"
+msgstr ""
+
+#: lml/maildir.py:316 lml/music.py:181 lml/twitter.py:178
+msgid "days"
+msgstr ""
+
+#: lml/maildir.py:360
+msgid "When I answer"
+msgstr ""
+
+#: lml/maildir.py:361
+msgid "When other people answer"
+msgstr ""
+
+#: lml/maildir.py:362
+msgid "Time before first response"
+msgstr ""
+
+#: lml/maildir.py:371 lml/maildir.py:372
+#, python-format
+msgid "Email statistics for %s"
+msgstr ""
+
+#: lml/maildir.py:372 lml/music.py:238 lml/ping.py:107 lml/twitter.py:199
+msgid "Overview"
+msgstr ""
+
+#: lml/maildir.py:400 lml/music.py:265
+msgid "Database not found!"
+msgstr ""
+
+#: lml/music.py:60
+#, python-format
+msgid "%d%% downloaded"
+msgstr ""
+
+#: lml/music.py:63
+msgid "Nothing to do. Listen to more music!"
+msgstr ""
+
+#: lml/music.py:92
+msgid "Listening to music"
+msgstr ""
+
+#: lml/music.py:105
+msgid "Listening to music (distribution)"
+msgstr ""
+
+#: lml/music.py:108
+msgid "number of tracks"
+msgstr ""
+
+#: lml/music.py:153
+msgid "Tracks played per day"
+msgstr ""
+
+#: lml/music.py:166
+msgid "Tracks played per day (averaged by month)"
+msgstr ""
+
+#: lml/music.py:179
+msgid "Tracks played per day (distribution)"
+msgstr ""
+
+#: lml/music.py:198
+msgid "Top tracks ("
+msgstr ""
+
+#: lml/music.py:199
+msgid "times played"
+msgstr ""
+
+#: lml/music.py:205 lml/music.py:230
+msgid "total"
+msgstr ""
+
+#: lml/music.py:206 lml/music.py:231
+msgid "last week"
+msgstr ""
+
+#: lml/music.py:207 lml/music.py:232
+msgid "last month"
+msgstr ""
+
+#: lml/music.py:208 lml/music.py:233
+msgid "last year"
+msgstr ""
+
+#: lml/music.py:223
+msgid "Top artists ("
+msgstr ""
+
+#: lml/music.py:224
+msgid "tracks played"
+msgstr ""
+
+#: lml/music.py:237 lml/music.py:238
+#, python-format
+msgid "Last.fm statistics for %s"
+msgstr ""
+
+#: lml/ping.py:58
+msgid "Pings"
+msgstr ""
+
+#: lml/ping.py:71
+msgid "Pings distribution"
+msgstr ""
+
+#: lml/ping.py:84
+msgid "Pings distribution on weekdays"
+msgstr ""
+
+#: lml/ping.py:97
+msgid "Pings distribution at the weekends"
+msgstr ""
+
+#: lml/ping.py:106 lml/ping.py:107
+#, python-format
+msgid "Online statistics for %s"
+msgstr ""
+
+#: lml/ping.py:128
+msgid "Data not found!"
+msgstr ""
+
+#: lml/twitter.py:59
+#, python-format
+msgid "%d pages downloaded"
+msgstr ""
+
+#: lml/twitter.py:89
+msgid "Tweets"
+msgstr ""
+
+#: lml/twitter.py:102
+msgid "Tweets distribution"
+msgstr ""
+
+#: lml/twitter.py:150
+msgid "Tweets per day"
+msgstr ""
+
+#: lml/twitter.py:163
+msgid "Tweets per day (averaged by month)"
+msgstr ""
+
+#: lml/twitter.py:176
+msgid "Tweets per day (distribution)"
+msgstr ""
+
+#: lml/twitter.py:191
+msgid "Tweets with a link"
+msgstr ""
+
+#: lml/twitter.py:191
+msgid "Tweets without a link"
+msgstr ""
+
+#: lml/twitter.py:192
+msgid "Links in tweets"
+msgstr ""
+
+#: lml/twitter.py:198 lml/twitter.py:199
+#, python-format
+msgid "Twitter statistics for %s"
+msgstr ""

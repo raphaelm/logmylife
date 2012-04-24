@@ -25,7 +25,7 @@ class Generator(lml.base.Generator):
 			if download:
 				lml.twitter.Download(FILE, USER).download()
 			chart = lml.twitter.Charts(FILE, FILEPREFIX, USER).create()
-			self.charts.append((chart, "Twitter: _rami_"))
+			self.charts.append((chart, _("Twitter: %s") % USER))
 			print "Twitter done."
 		except Exception as e:
 			traceback.print_exc(file=sys.stdout)
@@ -43,7 +43,7 @@ class Generator(lml.base.Generator):
 			if scan:
 				lml.maildir.Scan(MDIR, FILE).scan()
 			chart = lml.maildir.Charts(FILE, FILEPREFIX, ME, ACCOUNT).create()
-			self.charts.append((chart, "E-Mail: raphaelmichel95@gmail.com"))
+			self.charts.append((chart, _("Email: %s") % "raphaelmichel95@gmail.com"))
 			print "Mail done."
 		except Exception as e:
 			traceback.print_exc(file=sys.stdout)
@@ -61,7 +61,7 @@ class Generator(lml.base.Generator):
 			if download:
 				lml.music.DownloadLastFm(FILE, USER, APIK, OFFSET).download()
 			chart = lml.music.Charts(FILE, FILEPREFIX, USER).create()
-			self.charts.append((chart, "Music (Last.fm): rami95"))
+			self.charts.append((chart, _("Music (Last.fm): %s") % USER))
 			print "Music done."
 		except Exception as e:
 			traceback.print_exc(file=sys.stdout)
@@ -80,7 +80,7 @@ class Generator(lml.base.Generator):
 			if download:
 				lml.ping.Download(FILE, SERVER, KEYHASH, DEVICE).download()
 			chart = lml.ping.Charts(FILE, FILEPREFIX, DEVICE).create()
-			self.charts.append((chart, "Online time: desktop computer"))
+			self.charts.append((chart, _("Online time: desktop computer")))
 		except Exception as e:
 			traceback.print_exc(file=sys.stdout)
 			print "Ping error."
@@ -92,7 +92,7 @@ class Generator(lml.base.Generator):
 			if download:
 				lml.ping.Download(FILE, SERVER, KEYHASH, DEVICE).download()
 			chart = lml.ping.Charts(FILE, FILEPREFIX, DEVICE).create()
-			self.charts.append((chart, "Online time: smartphone"))
+			self.charts.append((chart, _("Online time: smartphone")))
 		except Exception as e:
 			traceback.print_exc(file=sys.stdout)
 			print "Ping error."
