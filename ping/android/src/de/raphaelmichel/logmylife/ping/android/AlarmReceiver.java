@@ -34,6 +34,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 		
   	  	if(!sp.getBoolean("service_active", false)){
 			am.cancel(sender);
+  	  	}else{
+			am.set(AlarmManager.RTC_WAKEUP, (System.currentTimeMillis() + (1000*60*15)), sender);
   	  	}
   	  	
   	  	ConnectivityManager conMgr =  (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -43,7 +45,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 		
 		}
 		else if ( conMgr.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED 
-		    ||  conMgr.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
+		    &&  conMgr.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
 		    Log.i("alarm", "no network");
 			return; // not online		
 		}
@@ -59,6 +61,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 			if (statusCode == 200) {
 				SharedPreferences.Editor spe = sp.edit();
 				spe.putString("last_ping", DateFormat.getDateTimeInstance().format(new Date()));
+				Log.i("alarm", "pinged");
 				spe.commit();
 			}else{
 				Log.i("alarm", ""+statusCode);

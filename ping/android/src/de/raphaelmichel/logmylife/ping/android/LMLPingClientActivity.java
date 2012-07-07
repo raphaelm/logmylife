@@ -53,21 +53,23 @@ public class LMLPingClientActivity extends PreferenceActivity {
 					return;
 				
 	      	  	if(!sharedPreferences.getBoolean("service_active", false)){
+	      	  		Log.i("start", "cancel");
 	    			am.cancel(sender);
 	      	  	}else{
 	      	  		Log.i("start", "start");
 	    			am.cancel(sender);
-	    			am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, sender);
-	      	  	}
+	    			am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, sender);
+	    		}
 			}
     	};
     	sp.registerOnSharedPreferenceChangeListener(spChanged);
 	  	
   	  	if(!sp.getBoolean("service_active", false)){
+  	  		Log.i("start", "cancel");
 			am.cancel(sender);
   	  	}else{
   	  		Log.i("start", "start");
-			am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, sender);
+			am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, sender);
   	  	}
     }
 }

@@ -19,7 +19,7 @@ public class BootcompletedReceiver extends BroadcastReceiver {
   	  	if(sp.getBoolean("service_active", true)){
 			// Get the AlarmManager service
 			AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-			am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, sender);
+			am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, sender);
   	  	}
 	}
 }
